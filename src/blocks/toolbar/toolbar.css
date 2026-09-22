@@ -1,0 +1,95 @@
+/* Элементы общей секции фильтров (DocFilterBar: «Реестр» и окно тем, QA-3 пп.4, 5): поиск,
+   зона фильтров, «Сбросить», счётчик. Поиск — поле ввода 40: заливка, линия снизу.
+   Долг: переименовать в filter-bar__* и слить в filter-bar.css (toolbar__glyph ещё и в drawer). */
+
+.toolbar__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  background: var(--input-bg);
+  border-radius: var(--input-radius);
+  box-shadow: var(--input-line);
+  padding: 0 12px;
+  height: var(--size-40);
+  width: 320px;
+  transition:
+    background-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
+}
+
+/* Поиск на всю первую строку секции (окно тем): фильтры уходят во 2-ю строку. */
+.toolbar__search_wide {
+  width: auto;
+  flex: 1 1 100%;
+}
+
+.toolbar__search:hover {
+  background: var(--input-bg-hover);
+}
+
+.toolbar__search:focus-within {
+  background: var(--input-bg-focus);
+  box-shadow: var(--input-line-focus);
+}
+
+.toolbar__glyph {
+  color: var(--color-text-secondary);
+}
+
+.toolbar__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  width: 100%;
+}
+
+.toolbar__input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.toolbar__input:focus-visible {
+  box-shadow: none;
+}
+
+.toolbar__clear {
+  display: flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+}
+
+.toolbar__clear:hover {
+  color: var(--color-text-primary);
+}
+
+.toolbar__shown {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  padding-right: 2px;
+  white-space: nowrap;
+}
+
+/* Зона фильтров: переносится сама в себе (flex-wrap), не двигая поиск и счётчик (п.2).
+   flex 1 1 0% — зона всегда стоит в строке поиска и забирает остаток ширины (счётчик прижат
+   вправо без spacer); min-width:auto = самый широкий контрол, поэтому не схлопывается. */
+.toolbar__filters {
+  flex: 1 1 0%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* «Сбросить» рендерится всегда — место зарезервировано, появление не переносит строку. */
+.toolbar__reset_hidden {
+  visibility: hidden;
+}

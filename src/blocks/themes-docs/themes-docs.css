@@ -1,0 +1,166 @@
+/* Левая панель модалки тем: список заголовков с чекбоксами.
+   Компактная таблица + чекбоксы (отмеченный — красный). */
+
+.themes-docs__sel {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Панель — колонка на всю высоту тела окна (QA-3 п.6): заголовок, фильтры и шапка колонок
+   на месте, скроллится только список. card__toolbar не сжимается сам (автоминимум flex-элемента
+   с overflow: visible = высота содержимого). */
+.themes-docs {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Секция фильтров в панели (микс filter-bar themes-docs__filters, QA-3 п.5). */
+.themes-docs__filters {
+  flex: none;
+  border-bottom: 1px solid var(--color-border-tertiary);
+}
+
+/* Пусто под фильтром — внутри списка, шапка остаётся (как .registry-table__empty). */
+.themes-docs__empty {
+  padding: 40px 20px;
+  text-align: center;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.themes-docs__head,
+.themes-docs__row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 96px 110px;
+  gap: 8px;
+  padding: 0 20px;
+  align-items: center;
+}
+
+/* Справа + ширина полосы списка (scrollbar-gutter: stable у __list): колонки шапки и строк
+   совпадают, «Тема» не съезжает на 17px. */
+.themes-docs__head {
+  flex: none;
+  padding-right: calc(20px + 17px);
+  height: 40px;
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+.themes-docs__th {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+}
+
+/* Единственный скролл окна тем. min-height 136 — предохранитель на самых низких окнах: при 144
+   на 960×600 карточка (overflow:hidden) срезала низ списка на 7–8px (QA F4). */
+.themes-docs__list {
+  flex: 1 1 auto;
+  min-height: 136px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.themes-docs__row {
+  min-height: 48px;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--c-surface);
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.themes-docs__row:hover {
+  background: var(--c-row-hover);
+}
+
+/* Выбранная строка — светлее muted-info, чтобы метка темы на ней не сливалась. */
+.themes-docs__row_on {
+  background: #f3f7fe;
+}
+
+.themes-docs__row_on:hover {
+  background: #e9f0fc;
+}
+
+.themes-docs__box {
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid rgba(30, 45, 80, 0.3);
+  border-radius: var(--radius-4);
+  background: var(--c-surface);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  transition:
+    background-color var(--duration) var(--ease),
+    border-color var(--duration) var(--ease);
+}
+
+/* «Выбрать всё» в пустом списке. */
+.themes-docs__box:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.themes-docs__box_on {
+  border-color: var(--c-btn);
+  background: var(--c-btn);
+}
+
+/* Ячейка заголовка: чип вида (ИСХ/ВХ) + текст заголовка. */
+.themes-docs__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.themes-docs__topic {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.themes-docs__reg {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+}
+
+/* Тема письма — статус 24: назначена — синий muted, нет — серый. */
+.themes-docs__theme {
+  display: inline-block;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: var(--radius-6);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  background: var(--color-translucent-200);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.themes-docs__theme_set {
+  background: var(--color-muted-info);
+  color: var(--color-text-info);
+}

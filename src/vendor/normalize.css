@@ -1,0 +1,15 @@
+/* Компактный локальный normalize (принцип 1: без внешних CDN). Подключается ПЕРВЫМ. */
+*,*::before,*::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; line-height: 1.15; }
+body { margin: 0; }
+main { display: block; }
+h1,h2,h3,h4,h5,h6,p,dl,dd,ul,ol { margin: 0; }
+ul,ol { padding: 0; }
+a { background-color: transparent; color: inherit; }
+img { border-style: none; max-width: 100%; }
+button,input,select,textarea { font-family: inherit; font-size: 100%; margin: 0; }
+button,select { text-transform: none; }
+button,[type='button'],[type='submit'] { -webkit-appearance: button; }
+button { cursor: pointer; }
+table { border-collapse: collapse; }
+[hidden] { display: none; }

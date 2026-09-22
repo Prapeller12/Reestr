@@ -1,0 +1,97 @@
+/* Цепочка документов: вертикальная линия с точками и карточками узлов.
+   Узлы — серые поверхности (радиус 12, без рамок), текущий — темнее. */
+
+.chain {
+  display: flex;
+  flex-direction: column;
+}
+
+.chain__node {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.chain__date {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  padding-top: 14px;
+}
+
+.chain__body {
+  border: none;
+  border-left: 2px solid var(--color-neutral-300);
+  background: transparent;
+  padding: 0 0 8px 16px;
+  position: relative;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  text-align: left;
+  width: 100%;
+}
+
+.chain__dot {
+  position: absolute;
+  left: -6px;
+  top: 16px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-circle);
+  background: var(--color-neutral-500);
+  box-shadow: 0 0 0 3px var(--c-surface);
+}
+
+.chain__card {
+  border-radius: var(--radius-12);
+  background: var(--color-bg-secondary);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.chain__body:hover .chain__card {
+  background: var(--color-neutral-300);
+}
+
+.chain__card_current,
+.chain__body:hover .chain__card_current {
+  background: var(--color-neutral-300);
+  box-shadow: inset 0 0 0 2px var(--color-dark);
+}
+
+/* Слева — чип вида и номер, роль узла прижата к правому краю. */
+.chain__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chain__reg {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+}
+
+.chain__role {
+  margin-left: auto;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.chain__topic {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+}
+
+.chain__status {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+}

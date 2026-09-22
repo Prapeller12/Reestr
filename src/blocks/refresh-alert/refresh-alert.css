@@ -1,0 +1,40 @@
+/* Плашка «Не удалось обновить данные» под шапкой (фикс QA F3 (л)): повторная загрузка упала,
+   прежние данные на экране. Палитра — как у error-state (приглушённый негативный фон, без рамки).
+   flex: none в колонке .page — таблица под ней сжимается, скролла у страницы нет (инвариант F2). */
+
+.refresh-alert {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  margin: 0 0 16px;
+  padding: 8px 12px 8px 20px;
+  border-radius: var(--radius-16);
+  background: var(--color-muted-negative);
+  color: var(--color-text-negative);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.refresh-alert__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.refresh-alert__title {
+  flex: none;
+  font-weight: 700;
+}
+
+.refresh-alert__detail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+}

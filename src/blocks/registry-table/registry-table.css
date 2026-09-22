@@ -1,0 +1,320 @@
+/* Таблица реестра: группы по темам, грид из 11 колонок.
+   Порядок (QA-батч): № · Рег.номер · Тип · Заголовок · Статус · Адресат · Подписант ·
+   Дата начала · Срок исполнения · Осталось дней · Ссылка. */
+
+/* Тело таблицы — единственный скролл вкладки (пп.9,13; QA-3 п.2): шапка, вкладки и секция
+   фильтров стоят на месте. Высоту даёт flex-колонка .page → .screen_fill → .screen__main
+   (без оценочных констант): тело по содержимому, но не выше остатка окна.
+   scrollbar-gutter: stable — место под вертикальную полосу зарезервировано всегда, поэтому
+   fr-колонки не «прыгают» при сворачивании/раскрытии тем.
+   Плата за это — зазор полосы внутри белой карточки (radius 24, overflow hidden): содержимое
+   в него не заходит, и справа у серых полос групп оставались белые прогалы и белый уголок.
+   Лечится «навылетом» --rt-bleed: фон полос продлевается тенью за правый край области
+   прокрутки (box-shadow не входит в scrollWidth → горизонтальный скролл не появляется),
+   лишнее срезает overflow:hidden карточки. Запас 40px с избытком перекрывает любую
+   системную ширину полосы. */
+.registry-table {
+  --rt-gap: 12px;
+  --rt-pad-x: 20px;
+  --rt-bleed: 40px;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+/* Полоса прокрутки таблицы — тонкая, с прозрачной дорожкой: серая полоса группы видна под
+   ней до самого края карточки (иначе непрозрачная системная дорожка снова режет фон). */
+.registry-table::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.registry-table::-webkit-scrollbar-track,
+.registry-table::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.registry-table::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-neutral-500);
+  background-clip: padding-box;
+}
+
+.registry-table::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-700);
+  background-clip: padding-box;
+}
+
+/* min-width = Σ МИНИМУМОВ колонок: фикс. 616 (40+120+52+108+84+84+128) + минимумы текстовых
+   530 (180+130+120+100) = 1146px, + column-gap 10×12 + паддинги строки 2×20 = 1306px.
+   Бюджет окна 1440: 1440 − 2×40 (.page) − 2 (рамки .card) − 12 (полоса) = 1346px ≥ 1306 —
+   от 1440 горизонтального скролла нет, уже — есть (QA-3 п.2, решение (а)).
+   Инвариант: строки (width:100%) не уже грида, иначе последняя колонка вылезает за таблицу. */
+.registry-table__inner {
+  min-width: calc(1146px + 10 * var(--rt-gap) + 2 * var(--rt-pad-x));
+}
+
+/* Разделитель групп (прежде border-bottom 10px) — собственный блок: у него, в отличие от
+   границы, есть своя тень-«навылет», поэтому полоса разделителя тоже доходит до края
+   карточки, а не обрывается перед зазором полосы прокрутки. */
+.registry-table__group::after {
+  content: '';
+  display: block;
+  height: 10px;
+  background: var(--c-bg);
+  box-shadow: var(--rt-bleed) 0 0 var(--c-bg);
+}
+
+/* Шапка группы липнет к верху скролл-контейнера (п.9). Фикс. высота 40px (border-box) —
+   под неё выставлен top у шапки колонок.
+   Цвет полосы — в переменной --rt-band: один источник и для фона, и для тени-«навылета»,
+   и для липкого левого кластера, поэтому ховер меняется целиком, до правого края. */
+.registry-table__group-header {
+  --rt-band: var(--c-group);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  box-sizing: border-box;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  background: var(--rt-band);
+  box-shadow: var(--rt-bleed) 0 0 var(--rt-band);
+  transition:
+    background-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
+}
+
+.registry-table__group-header:hover {
+  --rt-band: var(--c-group-hover);
+}
+
+/* Левый кластер (caret+имя+счётчик+гайка) прилипает к левому краю при горизонтальном
+   скролле таблицы (п.1) — имя темы и гайка видны без прокрутки вправо. Свой фон, чтобы
+   контент строки не просвечивал под кластером. */
+.registry-table__group-lead {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  background: var(--rt-band);
+}
+
+.registry-table__group-toggle {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Гайка «настроить тему» — сразу после имени/счётчика, не в правом конце строки (п.1).
+   Отдельная кнопка → клик по ней не сворачивает группу (stopPropagation в компоненте). */
+.registry-table__group-config {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-32);
+  height: var(--size-32);
+  margin-right: 10px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-8);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.registry-table__group-config:hover {
+  background: var(--color-translucent-200);
+  color: var(--color-text-primary);
+}
+
+.registry-table__caret {
+  color: var(--color-text-secondary);
+}
+
+.registry-table__group-name {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 700;
+}
+
+.registry-table__group-count {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.registry-table__head,
+.registry-table__row {
+  display: grid;
+  /* Узкие колонки с предсказуемым содержимым — фиксированные (подобраны по метрикам
+     основной шрифт интерфейса), текстовые — резиновые minmax(минимум, доля) (QA-3 п.2). */
+  grid-template-columns:
+    40px                  /* № */
+    120px                 /* Рег. номер («Регистрационный» 13px = 114px) */
+    52px                  /* Тип (чип «ИСХ» ≈ 37px) */
+    minmax(180px, 2fr)    /* Заголовок */
+    108px                 /* Статус (бейдж «Не исполнено» ≈ 98px) */
+    minmax(130px, 1.5fr)  /* Адресат */
+    minmax(120px, 1.2fr)  /* Подписант */
+    84px                  /* Дата начала («19.09.2026» ≈ 71px) */
+    84px                  /* Срок исполнения */
+    128px                 /* Осталось дней («просрочено 123 дн.» ≈ 127px) */
+    minmax(100px, 1.2fr); /* Ссылка на документ */
+  column-gap: var(--rt-gap);
+  align-items: center;
+  padding: 0 var(--rt-pad-x);
+}
+
+/* Каждая ячейка может ужаться и обрезаться, а не распирать колонку. */
+.registry-table__head > *,
+.registry-table__row > * {
+  min-width: 0;
+}
+
+/* Шапка колонок липнет под шапкой группы (top = высота group-header). */
+.registry-table__head {
+  position: sticky;
+  top: 40px;
+  z-index: 2;
+  height: 40px;
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+.registry-table__th {
+  font-size: var(--fs-secondary);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-secondary);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.registry-table__th_first {
+}
+
+/* Фикс. высота строки (п.4): все строки одинаковы, переполнение обрезается. */
+.registry-table__row {
+  height: 48px;
+  overflow: hidden;
+  border: none;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--c-surface);
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color var(--duration) var(--ease);
+  text-align: left;
+  width: 100%;
+}
+
+.registry-table__row:hover {
+  background: var(--c-row-hover);
+}
+
+.registry-table__num {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+
+.registry-table__reg {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ячейка типа (ИСХ/ВХ) — отдельная колонка (п.6). */
+.registry-table__type {
+  overflow: hidden;
+}
+
+.registry-table__text {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--t-3);
+}
+
+/* Дата начала / срок — одна строка, без переноса по цифрам. */
+.registry-table__date {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--t-3);
+  white-space: nowrap;
+}
+
+/* Многострочная обрезка (п.4): длинный заголовок/адресат/подписант/остаток — до 2 строк
+   с многоточием; полный текст — в нативном title. */
+.registry-table__topic,
+.registry-table__text,
+.registry-table__remaining {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.registry-table__topic {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+/* Прочерк статуса у входящих (у них статуса исполнения нет). */
+.registry-table__dash {
+  color: var(--t-9);
+}
+
+.registry-table__remaining {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--t-3);
+}
+
+.registry-table__remaining_overdue {
+  color: var(--c-danger);
+}
+
+.registry-table__remaining_soon {
+  color: var(--c-amber);
+}
+
+.registry-table__link {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--c-link);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.registry-table__empty {
+  padding: 40px 20px;
+  text-align: center;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--t-4);
+}

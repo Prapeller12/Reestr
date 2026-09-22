@@ -1,0 +1,58 @@
+/* Пилюля-переключатель: табы экранов, масштабы таймлайна, «Скрыть закрытые», пункты
+   сегментного переключателя (микс с segmented__item), табы импорта.
+   Тег-капсула: полупрозрачная серая заливка, радиус 99px,
+   выбранный — тёмный со светлым текстом. Размер по умолчанию 40, _sm/_md — 32. */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: var(--size-40);
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-translucent-300);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration) var(--ease),
+    color var(--duration) var(--ease);
+}
+
+.pill:hover {
+  background: rgba(30, 45, 80, 0.15);
+}
+
+.pill:active {
+  background: var(--color-translucent-400);
+}
+
+.pill_active,
+.pill_active:hover {
+  background: var(--color-dark);
+  color: var(--color-text-inverted);
+}
+
+.pill_active:active {
+  background: var(--color-dark-press);
+}
+
+.pill_sm,
+.pill_md {
+  min-height: var(--size-32);
+  gap: 6px;
+  padding: 0 12px;
+}
+
+.pill__hint {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  opacity: 0.6;
+}

@@ -1,0 +1,99 @@
+/* Правая выезжающая панель «Карточка документа». Белая панель без рамки, скругление внутреннего края 24, затемнённая подложка,
+   заголовок 22/26 700, секции — серые блоки-поверхности вместо рамок. */
+
+.drawer__overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 20;
+}
+
+.drawer {
+  width: 560px;
+  max-width: 92vw;
+  height: 100%;
+  background: var(--c-surface);
+  border-radius: var(--radius-24) 0 0 var(--radius-24);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.drawer__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 28px 28px 16px 32px;
+}
+
+.drawer__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Надзаголовок — капс 12/16 с разрядкой. */
+.drawer__eyebrow {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+.drawer__title {
+  font-size: var(--fs-heading);
+  line-height: var(--lh-heading);
+  font-weight: 700;
+}
+
+.drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 32px 40px;
+}
+
+.drawer__panel {
+  margin-top: 16px;
+  border-radius: var(--radius-16);
+  background: var(--color-bg-secondary);
+  overflow: hidden;
+}
+
+.drawer__status-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  flex-wrap: wrap;
+}
+
+.drawer__due {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.drawer__remaining {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Заголовок секции — капс 12/16 с разрядкой. */
+.drawer__section-title {
+  font-size: var(--fs-subheading);
+  line-height: var(--lh-subheading);
+  font-weight: 700;
+}
+
+.drawer__section {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

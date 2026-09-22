@@ -1,0 +1,6 @@
+/* SVG-иконка (компонент Icon): блочная, не сжимается во flex, цвет — currentColor. */
+
+.icon {
+  display: block;
+  flex: 0 0 auto;
+}

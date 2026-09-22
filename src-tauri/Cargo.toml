@@ -1,0 +1,45 @@
+[package]
+name = "reestr"
+version = "0.1.0"
+description = "Реестр писем — офлайн portable-приложение"
+authors = ["Agents Team"]
+edition = "2021"
+rust-version = "1.77"
+
+# Библиотечное ядро; тонкий bin (main.rs) вызывает reestr_lib::run().
+[lib]
+name = "reestr_lib"
+crate-type = ["lib"]
+
+[features]
+# Тесты парсера на реальных выгрузках 1С. Фикстуры (src-tauri/tests/fixtures/)
+# содержат данные организации и в репозиторий не выкладываются, поэтому по
+# умолчанию фича выключена: cargo test проходит без них.
+real-fixtures = []
+
+[build-dependencies]
+# Кодоген Tauri (иконки, схемы capabilities, встраивание конфига).
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Ядро Tauri v2. Плагин обновлений НЕ подключаем (принцип 1 — офлайн).
+tauri = { version = "2", features = [] }
+# Диалог выбора файла с фронтенда (импорт выгрузки .txt).
+tauri-plugin-dialog = "2"
+# SQLite вкомпилирован в бинарь (feature bundled) — принцип 2, автономность.
+rusqlite = { version = "0.32", features = ["bundled"] }
+# Сериализация DTO (serde rename_all = "camelCase" → зеркало src/api/types.ts).
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Даты: NaiveDate + арифметика (+30 календарных), Local для «сегодня»/таймстампов.
+# default features (clock/std) — без сети и без locales.
+chrono = "0.4"
+
+# Релиз собираем как единый reestr.exe (tauri build --no-bundle, toolchain MSVC).
+# panic=abort НЕ ставим: Tauri оборачивает команды и полагается на unwinding,
+# чтобы паника внутри команды превратилась в ошибку, а не убила процесс.
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

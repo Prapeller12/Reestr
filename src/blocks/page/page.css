@@ -1,0 +1,286 @@
+/* Базовый блок страницы: токены дизайн-системы Реестра (светлая тема).
+   Справочник значений — docs/design/design-system.md.
+
+   Устройство: сначала первичные токены (--color-*, --radius-*, --shadow-*, --size-*),
+   затем прежние имена Реестра (--c-*, --b-*, --t-*, --st-*), которые блоки уже используют, —
+   они только ссылаются на первичные. Новые значения заводить в первичном слое. */
+
+:root {
+  /* ── акценты ───────────────────────────────────────────── */
+  --color-accent: #e5402b;              /* главное действие: primary-кнопка, отмеченный чекбокс */
+  --color-accent-hover: #d63822;
+  --color-accent-press: #c4301b;
+  --color-dark: #1d2029;                /* выбранный тег/сегмент, btn_dark, плашка «входящее» */
+  --color-dark-hover: #2b2f3a;
+  --color-dark-press: #353a46;
+
+  /* ── фоны ──────────────────────────────────────────────── */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f3f4f7;
+  --color-bg-tertiary: #e8eaee;
+  --color-bg-quaternary: #dde0e6;
+  --color-neutral-200: #eef0f3;
+  --color-neutral-300: #e8eaef;
+  --color-neutral-400: #d3d6de;
+  --color-neutral-500: #bcc0ca;
+  --color-neutral-700: #878c99;
+  /* Полупрозрачные нейтрали: фон вторичных кнопок, ховеры поверх любого фона */
+  --color-translucent-100: rgba(30, 45, 80, 0.06);
+  --color-translucent-200: rgba(30, 45, 80, 0.08);
+  --color-translucent-300: rgba(30, 45, 80, 0.11);
+  --color-translucent-400: rgba(30, 45, 80, 0.18);
+  --color-overlay: rgba(10, 14, 24, 0.55);
+
+  /* ── границы ───────────────────────────────────────────── */
+  --color-border-primary: #d6d9e0;
+  --color-border-secondary: #e8eaef;
+  --color-border-tertiary: #f3f4f7;
+  --color-border-underline: #babec8;
+  --color-border-key: #000000;
+
+  /* ── текст (полупрозрачный — так он одинаково читается на белом и на сером) ── */
+  --color-text-primary: rgba(12, 16, 28, 0.9);
+  --color-text-primary-hover: rgba(12, 16, 28, 0.65);
+  --color-text-secondary: rgba(12, 16, 28, 0.56);
+  --color-text-tertiary: rgba(12, 16, 28, 0.4);
+  --color-text-disabled: rgba(12, 16, 28, 0.2);
+  --color-text-inverted: rgba(255, 255, 255, 0.95);
+  --color-text-link: #2f6fe0;
+  --color-text-link-hover: #265cc4;
+  --color-text-positive: #158a41;
+  --color-text-negative: #d93a2b;
+  --color-text-negative-hover: #bb2f22;
+  --color-text-attention: #d9790f;
+  --color-text-info: #2f6fe0;
+
+  /* ── статусы (яркие и приглушённые) ────────────────────── */
+  --color-status-positive: #1fb45c;
+  --color-status-negative: #f0503f;
+  --color-status-attention: #f29a24;
+  --color-status-info: #3182ec;
+  --color-muted-positive: #e2f5e7;
+  --color-muted-negative: #fdece9;
+  --color-muted-attention: #fdf1dd;
+  --color-muted-info: #e6effc;
+  --color-muted-alt-positive: #d3eedb;
+  --color-muted-alt-negative: #fbdcd8;
+  --color-muted-alt-attention: #fbe7cb;
+  --color-muted-alt-info: #d7e6fb;
+  /* Насыщенные цвета статусов: заливка + белый текст */
+  --color-contrast-positive: #1fb45c;
+  --color-contrast-negative: #ee5a45;
+  --color-contrast-attention: #f29a24;
+  --color-contrast-info: #3a86ee;
+
+  /* ── скругления ────────────────────────────────────────── */
+  --radius-4: 4px;
+  --radius-6: 6px;
+  --radius-8: 8px;       /* кнопка 32, чип 24–32 */
+  --radius-10: 10px;     /* кнопка 40/48, статус 32 */
+  --radius-12: 12px;     /* кнопка 56, поле ввода, выпадающее меню */
+  --radius-16: 16px;     /* поповер, календарь */
+  --radius-20: 20px;
+  --radius-24: 24px;     /* карточка, модальное окно, панель */
+  --radius-32: 32px;     /* крупная промо-карточка сайта */
+  --radius-pill: 99px;   /* теги-фильтры, сегментированный переключатель */
+  --radius-circle: 50%;
+
+  /* ── тени ──────────────────────────────────────────────── */
+  --shadow-xs: 0 4px 8px rgba(0, 0, 0, 0.04), 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-s: 0 12px 16px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.04),
+    0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-m: 0 20px 24px rgba(0, 0, 0, 0.08), 0 12px 16px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.04), 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-l: 0 24px 32px rgba(0, 0, 0, 0.08), 0 20px 24px rgba(0, 0, 0, 0.08),
+    0 12px 16px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.04), 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 32px 40px rgba(0, 0, 0, 0.08), 0 24px 32px rgba(0, 0, 0, 0.08),
+    0 20px 24px rgba(0, 0, 0, 0.08), 0 12px 16px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.04), 0 0 1px rgba(0, 0, 0, 0.04);
+
+  /* ── высоты контролов и фокус ──────────────────────────── */
+  --size-24: 24px;
+  --size-32: 32px;
+  --size-40: 40px;
+  --size-48: 48px;
+  --size-56: 56px;
+  --focus-ring: 0 0 0 2px var(--color-status-info);
+
+  /* ── типографика: шесть ролей, другие размеры не заводить ───────────────
+     title      24/32 700 — заголовок экрана, крупные числа итогов
+     heading    20/28 700 — заголовок окна и выдвижной панели
+     subheading 16/24 700 — заголовок секции, карточки, панели
+     body       14/20 400 — основной текст, поля ввода, плейсхолдеры; 500 — контролы и акценты
+     secondary  13/18 400 — подсказки, шапки таблиц, мета, даты
+     caption    12/16 400 — подписи и счётчики; 500 — статусы, чипы, теги
+     Веса только 400/500/700 (других начертаний в шрифте нет). Разрядки нет нигде,
+     кроме аббревиатур ИСХ/ВХ. Ослабление текста — цветом, не прозрачностью. ── */
+  --fs-title: 24px;
+  --lh-title: 32px;
+  --fs-heading: 20px;
+  --lh-heading: 28px;
+  --fs-subheading: 16px;
+  --lh-subheading: 24px;
+  --fs-body: 14px;
+  --lh-body: 20px;
+  --fs-secondary: 13px;
+  --lh-secondary: 18px;
+  --fs-caption: 12px;
+  --lh-caption: 16px;
+
+  /* ── Поле ввода — лёгкая заливка, скругление только сверху,
+     линия снизу 2px; ховер/фокус — заливка темнее, в фокусе линия тёмная 1px, ошибка — красная.
+     Линия рисуется inset-тенью, чтобы смена толщины не сдвигала вёрстку. ── */
+  --input-bg: var(--color-translucent-100);
+  --input-bg-hover: var(--color-translucent-400);
+  --input-bg-focus: var(--color-translucent-400);
+  --input-line: inset 0 -2px 0 0 var(--color-neutral-500);
+  --input-line-focus: inset 0 -1px 0 0 var(--color-text-primary);
+  --input-line-error: inset 0 -1px 0 0 var(--color-status-negative);
+  --input-radius: var(--radius-4) var(--radius-4) 0 0;
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --duration: 0.2s;
+
+  /* ── шрифт ─────────────────────────────────────────────── */
+  --font-ui: 'Golos Text', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Helvetica, sans-serif;
+
+  /* ═══ Имена блоков Реестра → первичные токены ═══════════════════════════════ */
+
+  /* Поверхности */
+  --c-bg: var(--color-bg-secondary);
+  --c-surface: var(--color-bg-primary);
+  --c-subtle: #f8f8fa;
+  --c-row-hover: var(--color-bg-secondary);
+  --c-selected: var(--color-neutral-200);
+  --c-head-2: var(--color-bg-secondary);
+  --c-group: var(--color-neutral-300);
+  --c-group-hover: var(--color-bg-quaternary);
+  --c-chip: var(--color-bg-secondary);
+  --c-menu-hover: var(--color-bg-secondary);
+  --c-option-on: var(--color-neutral-200);
+  --c-accent-soft: var(--color-muted-info);
+  --c-danger-soft: var(--color-muted-negative);
+
+  /* Границы: их мало, поверхности отделяются фоном */
+  --b-main: var(--color-border-secondary);
+  --b-soft: var(--color-border-secondary);
+  --b-row: var(--color-border-tertiary);
+  --b-grid: var(--color-border-tertiary);
+  --b-strong: var(--color-border-primary);
+  --b-muted: var(--color-border-primary);
+  --b-hover: var(--color-border-underline);
+  --b-error: var(--color-muted-alt-negative);
+
+  /* Текст: шаги нейтральной полупрозрачной шкалы */
+  --t-main: var(--color-text-primary);
+  --t-2: var(--color-text-primary);
+  --t-3: rgba(12, 16, 28, 0.74);
+  --t-4: rgba(12, 16, 28, 0.65);
+  --t-5: var(--color-text-secondary);
+  --t-6: var(--color-text-secondary);
+  --t-7: rgba(12, 16, 28, 0.48);
+  --t-8: var(--color-text-tertiary);
+  --t-9: var(--color-text-tertiary);
+
+  /* Акценты и семантика */
+  --c-link: var(--color-text-link);
+  --c-link-dark: var(--color-text-link-hover);
+  --c-btn: var(--color-accent);          /* primary-кнопка и чекбокс — красные */
+  --c-btn-hover: var(--color-accent-hover);
+  --c-btn-press: var(--color-accent-press);
+  --c-btn-off: var(--color-translucent-100);
+  --c-danger: var(--color-text-negative);
+  --c-danger-2: var(--color-text-negative-hover);
+  --c-was: var(--color-text-negative);
+  --c-now: var(--color-text-positive);
+  --c-amber: var(--color-text-attention);
+  --c-silence: var(--color-status-negative);
+
+  /* Статусы задач: -bg/-fg — приглушённый вариант (таблица, карточка, бейджи);
+     -solid — насыщенный (плашки таймлайна «Связи» и легенда), текст на них белый. */
+  --st-done-bg: var(--color-muted-positive);
+  --st-done-fg: var(--color-text-positive);
+  --st-done-solid: var(--color-contrast-positive);
+  --st-inwork-bg: var(--color-muted-info);
+  --st-inwork-fg: var(--color-text-info);
+  --st-inwork-solid: var(--color-contrast-info);
+  --st-overdue-bg: var(--color-muted-negative);
+  --st-overdue-fg: var(--color-text-negative);
+  --st-overdue-solid: var(--color-contrast-negative);
+  --st-reworked-bg: var(--color-muted-attention);
+  --st-reworked-fg: var(--color-text-attention);
+  --st-reworked-solid: var(--color-contrast-attention);
+  --st-solid-fg: var(--color-text-inverted);
+
+  /* Вид документа (не статус): входящее письмо — тёмная плашка (--color-dark),
+     чтобы на таймлайне читаться как финальный узел цепочки и выделяться на ч/б печати. */
+  --kind-in-bg: var(--color-dark);
+  --kind-in-fg: var(--color-text-inverted);
+
+  /* Шрифты: моноширинного нет — номера и даты выравниваются табличными цифрами (tnum) */
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-ui);
+
+  /* Размеры: потолок ширины контента (QA-3 п.2б) — до него экран резиновый, шире — симметричные поля.
+     Боковой отступ страницы — отдельным токеном: он входит в потолок .page. */
+  --w-content: 2200px;
+  --page-pad-x: 40px;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Пока открыт любой попап — фон не скроллится (класс ставит хук useScrollLock).
+   padding-right компенсирует пропавшую полосу прокрутки, чтобы фон не смещался. */
+body.is-scroll-locked {
+  overflow: hidden;
+  padding-right: var(--scrollbar-lock, 0px);
+}
+
+a {
+  color: var(--c-link);
+  text-decoration: none;
+  transition: color var(--duration) var(--ease);
+}
+
+a:hover {
+  color: var(--c-link-dark);
+}
+
+::selection {
+  background: var(--color-muted-alt-info);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Каркас (QA-3 п.2): колонка ровно на высоту окна — шапка → вкладки → экран вкладки (flex:1).
+   ИНВАРИАНТ: у программы нет вертикального скролла ни в каком состоянии — скроллится только тело
+   таблицы / таймлайна (свой overflow:auto внутри карточки). overflow:clip страхует от переполнения,
+   не делая .page scroll-контейнером; fixed-оверлеи (модалки, drawer) он не режет.
+   Потолок ширины — здесь, одним местом: контент ровно --w-content, по центру. */
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
+  max-width: calc(var(--w-content) + 2 * var(--page-pad-x));
+  margin: 0 auto;
+  background: var(--c-bg);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--t-main);
+  padding: 32px var(--page-pad-x) 24px;
+  box-sizing: border-box;
+}
+
+.page__spacer {
+  flex: 1;
+}

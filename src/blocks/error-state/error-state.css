@@ -1,0 +1,29 @@
+/* Ошибка загрузки/операции — плашка: приглушённый негативный фон, без рамки, r24. */
+
+.error-state {
+  flex: none;
+  box-sizing: border-box;
+  padding: 20px 24px;
+  border-radius: var(--radius-24);
+  background: var(--color-muted-negative);
+  color: var(--color-text-negative);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.error-state__title {
+  font-size: var(--fs-subheading);
+  line-height: var(--lh-subheading);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.error-state__code {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+}
+
+.error-state__actions {
+  margin-top: 12px;
+}

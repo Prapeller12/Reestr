@@ -1,0 +1,34 @@
+/* Сегментный переключатель (QA-3 п.4: «Все · Исходящие · Входящие»): серая капсула-трек r99
+   с отступом 2px, внутри — пилюли. Пункты — микс `pill segmented__item`: шрифт, радиус и выбранное
+   состояние берутся у блока pill. Выбранное состояние — `pill_active` (микс с pill), фон
+   невыбранных гасим здесь. Высота 2 + 36 + 2 = 40 — как у кнопок фильтров и поиска.
+   Вид повторяет вкладки «Реестр / Связи» (tab-strip). */
+
+.segmented {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-translucent-200);
+}
+
+.segmented__item {
+  min-height: 36px;
+  padding: 0 16px;
+  font-weight: 500;
+}
+
+.segmented__item:not(.pill_active) {
+  background: transparent;
+}
+
+.segmented__item:not(.pill_active):hover {
+  background: var(--color-translucent-200);
+}
+
+/* Отклик на нажатие — на ступень плотнее hover. */
+.segmented__item:not(.pill_active):active {
+  background: var(--color-translucent-300);
+}

@@ -1,0 +1,109 @@
+/* Инлайн-правка поля исходящего (Подписант/Адресаты, §3) и раскрытие календаря срока (§4)
+   внутри ячейки «Значение» таблицы полей. Кнопки — размер 32 (радиус 8). */
+
+.field-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-edit__text {
+  min-width: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+/* Правка поля (FIELD_OVERRIDE, §5a) — служебная строка под значением, а не бейдж с кнопкой:
+   приглушённый текст «Изменено вручную» и возврат ссылкой. */
+.field-edit__note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-tertiary);
+}
+
+.field-edit__link {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--c-link);
+  cursor: pointer;
+  text-align: left;
+}
+
+.field-edit__link:hover,
+.field-edit__link:focus-visible {
+  color: var(--c-link-dark);
+  text-decoration: underline;
+}
+
+.field-edit__link:disabled {
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.field-edit__btn {
+  flex: 0 0 auto;
+  min-height: var(--size-32);
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-8);
+  background: var(--color-translucent-300);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.field-edit__btn:hover {
+  background: rgba(30, 45, 80, 0.15);
+}
+
+.field-edit__btn:disabled {
+  background: var(--color-translucent-100);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.field-edit__btn_primary {
+  background: var(--c-btn);
+  color: #ffffff;
+}
+
+.field-edit__btn_primary:hover {
+  background: var(--c-btn-hover);
+}
+
+.field-edit__edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-edit__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field-edit__error {
+  border-radius: var(--radius-12);
+  background: var(--color-muted-negative);
+  padding: 8px 12px;
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-negative);
+}

@@ -1,0 +1,215 @@
+/* Блок «Сменить статус — привязать письмо»: подсказки, список привязанных писем,
+   строка поиска письма из базы и выпадающие совпадения (макет §6.1, экран 3).
+   Лежит на серой поверхности drawer__panel, поэтому вложенные блоки — белые (белое на
+   сером вместо рамок). */
+
+.transition {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transition__label {
+  font-size: var(--fs-subheading);
+  line-height: var(--lh-subheading);
+  font-weight: 700;
+}
+
+.transition__hint {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  text-wrap: pretty;
+}
+
+.transition__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Список уже привязанных писем с кнопкой «Отвязать». */
+.transition__attached {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: var(--radius-12);
+  padding: 8px 8px 8px 12px;
+  background: var(--c-surface);
+}
+
+.transition__attached-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transition__attached-topic {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* «Отвязать» — прозрачная кнопка 32, негативный текст. */
+.transition__detach {
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-8);
+  min-height: var(--size-32);
+  padding: 0 12px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  color: var(--color-text-negative);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.transition__detach:hover {
+  background: var(--color-muted-negative);
+}
+
+.transition__detach:disabled {
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+/* Строка поиска письма — поле ввода (заливка, линия снизу). */
+.transition__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  background: var(--input-bg);
+  border-radius: var(--input-radius);
+  box-shadow: var(--input-line);
+  padding: 0 12px;
+  height: var(--size-48);
+  transition:
+    background-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
+}
+
+.transition__search:hover {
+  background: var(--input-bg-hover);
+}
+
+.transition__search:focus-within {
+  background: var(--input-bg-focus);
+  box-shadow: var(--input-line-focus);
+}
+
+.transition__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  width: 100%;
+}
+
+.transition__input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.transition__input:focus-visible {
+  box-shadow: none;
+}
+
+.transition__found {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+/* Выпадающие совпадения — выпадающее меню. */
+.transition__drop {
+  border-radius: var(--radius-16);
+  background: var(--c-surface);
+  padding: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-m);
+}
+
+.transition__opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-8);
+  background: transparent;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.transition__opt:hover {
+  background: var(--color-translucent-100);
+}
+
+.transition__opt_picked {
+  background: var(--color-translucent-200);
+}
+
+.transition__opt-reg {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.transition__opt-topic {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transition__idle {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-tertiary);
+}
+
+.transition__error {
+  border-radius: var(--radius-12);
+  background: var(--color-muted-negative);
+  padding: 12px 16px;
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-negative);
+}
+
+.transition__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.transition__picked {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}

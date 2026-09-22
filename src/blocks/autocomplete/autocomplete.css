@@ -1,0 +1,78 @@
+/* Лёгкое автодополнение (§3): инпут + список совпадений из справочника участников.
+   Список — в нормальном потоке (не absolute), поэтому не клипается overflow:hidden таблицы полей.
+   Инпут — поле ввода 40 (заливка + линия снизу), список — выпадающее меню. */
+
+.autocomplete {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Поле — textarea, растущая по содержимому (высоту ставит компонент через scrollHeight):
+   длинное ФИО с должностью видно целиком, до 6 строк, дальше свой скролл. */
+.autocomplete__input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--size-40);
+  max-height: 168px;
+  padding: 9px 12px;
+  resize: none;
+  overflow-y: auto;
+  border: none;
+  border-radius: var(--input-radius);
+  background: var(--input-bg);
+  box-shadow: var(--input-line);
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  transition:
+    background-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
+}
+
+.autocomplete__input:hover {
+  background: var(--input-bg-hover);
+}
+
+.autocomplete__input:focus {
+  background: var(--input-bg-focus);
+  box-shadow: var(--input-line-focus);
+}
+
+.autocomplete__input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.autocomplete__list {
+  border-radius: var(--radius-16);
+  padding: 8px;
+  max-height: 192px;
+  overflow-y: auto;
+  background: var(--c-surface);
+  box-shadow: var(--shadow-m);
+}
+
+.autocomplete__option {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-8);
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  /* Вариант из справочника показываем целиком: ФИО с должностью обрезалось многоточием. */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.autocomplete__option:hover {
+  background: var(--color-translucent-100);
+}

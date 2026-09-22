@@ -1,0 +1,10 @@
+# Текстовые файлы хранятся в репозитории с LF, в рабочей копии — как принято в ОС.
+* text=auto
+
+# Бинарники не трогать
+*.png binary
+*.ico binary
+*.icns binary
+*.woff binary
+*.woff2 binary
+*.zip binary

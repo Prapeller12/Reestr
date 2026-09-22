@@ -1,0 +1,42 @@
+/* Шапка страницы: заголовок слева, мета-группа с кнопками «Импорт» и «Печать» справа.
+   Заголовок — жирный 30/36. */
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex: none;
+  margin: 0 0 24px;
+}
+
+.page-header__left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-header__title {
+  font-size: var(--fs-title);
+  line-height: var(--lh-title);
+  font-weight: 700;
+}
+
+.page-header__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-header__note {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+}
+
+.page-header__divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 4px;
+  background: var(--color-border-primary);
+}

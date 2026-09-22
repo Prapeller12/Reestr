@@ -1,0 +1,12 @@
+/* Состояние загрузки — белая карточка (r24, без рамки). */
+
+.loading-state {
+  flex: none;
+  padding: 40px;
+  background: var(--c-surface);
+  border-radius: var(--radius-24);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+  text-align: center;
+}

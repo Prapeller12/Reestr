@@ -1,0 +1,44 @@
+/* Единственная точка сборки стилей (правила проекта §4).
+   Порядок: нормализация → шрифты → токены → общие блоки → блоки экранов → печать. */
+
+@import url('./vendor/normalize.css');
+@import url('./vendor/fonts/golos-text.css');
+
+@import url('./blocks/page/page.css');
+@import url('./blocks/icon/icon.css');
+@import url('./blocks/screen/screen.css');
+@import url('./blocks/btn/btn.css');
+@import url('./blocks/pill/pill.css');
+@import url('./blocks/segmented/segmented.css');
+@import url('./blocks/card/card.css');
+@import url('./blocks/status-badge/status-badge.css');
+@import url('./blocks/type-chip/type-chip.css');
+@import url('./blocks/loading-state/loading-state.css');
+@import url('./blocks/error-state/error-state.css');
+@import url('./blocks/refresh-alert/refresh-alert.css');
+
+@import url('./blocks/page-header/page-header.css');
+@import url('./blocks/tab-strip/tab-strip.css');
+
+@import url('./blocks/toolbar/toolbar.css');
+@import url('./blocks/filter-bar/filter-bar.css');
+@import url('./blocks/filter/filter.css');
+@import url('./blocks/registry-table/registry-table.css');
+
+@import url('./blocks/timeline/timeline.css');
+
+@import url('./blocks/modal/modal.css');
+@import url('./blocks/themes-docs/themes-docs.css');
+@import url('./blocks/themes-side/themes-side.css');
+@import url('./blocks/import-upload/import-upload.css');
+@import url('./blocks/import-result/import-result.css');
+
+@import url('./blocks/drawer/drawer.css');
+@import url('./blocks/transition/transition.css');
+@import url('./blocks/chain/chain.css');
+@import url('./blocks/doc-fields/doc-fields.css');
+@import url('./blocks/field-edit/field-edit.css');
+@import url('./blocks/autocomplete/autocomplete.css');
+@import url('./blocks/date-picker/date-picker.css');
+
+@import url('./blocks/print/print.css');

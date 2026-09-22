@@ -1,0 +1,161 @@
+/* Мультиселект-фильтр: кнопка + выпадающее меню с чекбоксами и счётчиками.
+   Кнопка — тег-капсула 40; при активном фильтре — выбранный тёмный тег.
+   Меню — белый поповер: радиус 16, тень m, без рамки.
+   Меню рендерится ПОРТАЛОМ в body (QA-3 п.10), поэтому вне .filter в DOM; класс .filter
+   остаётся корнем кнопки (по нему и по .filter__menu работает закрытие кликом вне). */
+
+.filter__button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: var(--size-40);
+  padding: 0 12px 0 16px;
+  border: none;
+  background: var(--color-translucent-300);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.filter__button:hover {
+  background: rgba(30, 45, 80, 0.15);
+}
+
+.filter__button_active,
+.filter__button_active:hover {
+  background: var(--color-dark);
+}
+
+.filter__label {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+/* Значение ограничено по ширине (находка QA F2): длинный подписант/адресат иначе растил кнопку
+   до ~690px и переносил секцию фильтров на лишние строки. Полное значение — в title кнопки. */
+.filter__value {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.filter__caret {
+  color: var(--color-text-secondary);
+}
+
+.filter__button_active .filter__label,
+.filter__button_active .filter__caret {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.filter__button_active .filter__value {
+  color: var(--color-text-inverted);
+}
+
+/* Меню поверх всего экрана: position:fixed от кнопки. Координаты и max-height — данные геометрии,
+   их пишет хук useFloatingPosition в custom properties (--float-*); оформление — здесь.
+   Никакой overflow предка (карточка реестра, .modal окна тем) меню не обрезает. */
+.filter__menu {
+  position: fixed;
+  left: var(--float-left, 0px);
+  top: var(--float-top, 0px);
+  z-index: 40; /* выше модалок (28/30) и drawer (20) */
+  box-sizing: border-box;
+  width: max-content; /* ширина не зависит от left: у правого края меню сдвигается, а не сжимается */
+  min-width: 260px;
+  max-width: min(440px, calc(100vw - 16px));
+  max-height: var(--float-max-h, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--c-surface);
+  border-radius: var(--radius-16);
+  box-shadow: var(--shadow-m);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* Портал вне .page — шрифт и цвет наследовать не от кого, задаём явно. */
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--t-main);
+}
+
+/* Снизу меньше минимума (240px) — меню открывается вверх, привязано нижним краем к кнопке. */
+.filter__menu_up {
+  top: auto;
+  bottom: var(--float-bottom, 0px);
+}
+
+.filter__option {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-8);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.filter__option:hover {
+  background: var(--color-translucent-100);
+}
+
+.filter__option_on {
+  background: var(--color-translucent-200);
+}
+
+.filter__option-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Чекбокс: квадрат 18, радиус 4, рамка 1.5px; отмеченный — красный с белой галкой. */
+.filter__mark {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border: 1.5px solid rgba(30, 45, 80, 0.3);
+  border-radius: var(--radius-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-inverted);
+  background: var(--c-surface);
+}
+
+.filter__option_on .filter__mark {
+  border-color: var(--c-btn);
+  background: var(--c-btn);
+}
+
+.filter__count {
+  flex: 0 0 auto;
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-tertiary);
+}

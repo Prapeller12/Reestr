@@ -1,0 +1,52 @@
+/* Таблица полей письма: «Поле» / «Значение» / «Действие» (колонки выгрузки 1С).
+   Список «ключ — значение»: без рамок, ключ — вторичный текст, строки через тонкую линию.
+   Третья колонка — действия строки: кнопка «Изменить»/«Отмена» всех полей стоит в одну
+   вертикаль у правого края и не переезжает под значение, каким бы длинным оно ни было. */
+
+.doc-fields {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr) auto;
+  margin-top: 24px;
+}
+
+.doc-fields__head {
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--color-border-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+.doc-fields__key {
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.doc-fields__value {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+/* Раскрывающийся блок строки (календарь срока, ошибка) — во всю ширину таблицы:
+   в колонке значения ему тесно, сетка месяца ломается. */
+.doc-fields__expand {
+  grid-column: 1 / -1;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+}
+
+/* Ячейка действия: пустая у нечитаемых полей, кнопка — по верхней линии значения. */
+.doc-fields__action {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 12px 0 12px 16px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+}

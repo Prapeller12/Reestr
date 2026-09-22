@@ -1,0 +1,437 @@
+/* Таймлайн «Связи писем»: легенда, масштаб, ось, дорожки, плашки, связи, «тишина».
+   Плашки и легенда — насыщенные статусы ( заливка, белый текст, без рамки).
+   Координаты (left/top/width/height) задаются inline — это данные, не оформление. */
+
+.timeline-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+}
+
+.timeline-legend__hint {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+
+.timeline-legend__items {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: nowrap;
+}
+
+.timeline-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.timeline-legend__swatch {
+  width: 16px;
+  height: 12px;
+  border-radius: var(--radius-4);
+}
+
+.timeline-legend__swatch_inwork {
+  background: var(--st-inwork-solid);
+}
+
+.timeline-legend__swatch_done {
+  background: var(--st-done-solid);
+}
+
+.timeline-legend__swatch_overdue {
+  background: var(--st-overdue-solid);
+}
+
+.timeline-legend__swatch_reworked {
+  background: var(--st-reworked-solid);
+}
+
+/* Входящее — не статус, а вид документа (§2): своя палитра вне четвёрки статусов. */
+.timeline-legend__swatch_incoming {
+  background: var(--kind-in-bg);
+}
+
+.timeline-legend__label {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+}
+
+.timeline-scale {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--c-surface);
+}
+
+.timeline-scale__label {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Подсказка: на крупном масштабе граф печатается слишком мелко (только на экране). */
+.timeline-scale__note {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+}
+
+.timeline-scale__range {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+/* Свой скролл-контейнер (пп.9,13): вертикально скроллится тело таймлайна, шкала времени
+   липнет к верху, подписи тем — к левому краю. Высоту даёт flex-колонка .page → .screen_fill →
+   .screen__main (QA-3 п.2): по содержимому, но не выше остатка окна — без оценочных констант. */
+.timeline__scroll {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Верхняя шкала времени закреплена при вертикальной прокрутке (п.13). */
+.timeline__axis {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: grid;
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--b-soft);
+}
+
+.timeline__axis-side {
+  position: sticky;
+  left: 0;
+  background: var(--c-surface);
+  z-index: 4;
+}
+
+.timeline__axis-track {
+  position: relative;
+  height: 40px;
+}
+
+.timeline__tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--b-row);
+  padding-left: 8px;
+  display: flex;
+  align-items: center;
+}
+
+/* Ведущая подпись периода, начавшегося левее шкалы: на left 0, без засечки (двойная линия
+   у рамки колонки тем). */
+.timeline__tick_lead {
+  border-left: none;
+}
+
+.timeline__tick-label {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+/* «сегодня» ложится поверх подписи засечки под собой. */
+.timeline__today .timeline__tick-label {
+  position: relative;
+  z-index: 1;
+  padding-right: 4px;
+  background: var(--c-surface);
+}
+
+.timeline__today {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid var(--color-accent);
+  padding-left: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.timeline__lane {
+  display: grid;
+  border-bottom: 1px solid var(--b-row);
+}
+
+.timeline__lane-side {
+  position: sticky;
+  left: 0;
+  background: var(--c-surface);
+  z-index: 4;
+  border-right: 1px solid var(--b-row);
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.timeline__lane-name {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Подпись дорожки («N писем · макс. просрочка N дн.») может быть длиннее колонки тем —
+   обрезаем многоточием, полный текст в title, иначе текст залезал на область графика. */
+.timeline__lane-meta {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline__lane-meta_alert {
+  color: var(--c-danger);
+}
+
+.timeline__track {
+  position: relative;
+}
+
+.timeline__grid-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--b-grid);
+}
+
+.timeline__today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid var(--color-accent);
+  opacity: 0.35;
+}
+
+.timeline__link {
+  position: absolute;
+  border-top: 1px solid var(--b-muted);
+}
+
+/* Пунктирный хвост — «тишина» от последнего письма до сегодня. */
+.timeline__tail {
+  position: absolute;
+  border-top: 1px dashed var(--c-silence);
+}
+
+/* Позиция ряда: одиночная плашка или колода (QA-3 п.3). Координаты — inline (left/top/transform),
+   на дате стоит левый край (у правого края трека — правый, модификатор _flip).
+   Ширина 180px = CHIP_W в src/lib/timeline.ts — менять вместе. */
+.timeline__pos {
+  position: absolute;
+  width: 180px;
+  z-index: 2;
+}
+
+.timeline__pos:hover,
+.timeline__pos:focus-within {
+  z-index: 3;
+}
+
+.timeline__chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-8);
+  cursor: pointer;
+  transition: box-shadow var(--duration) var(--ease);
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+  text-align: left;
+}
+
+.timeline__chip:hover {
+  box-shadow: var(--shadow-s);
+}
+
+/* Лицо колоды — верхнее (последнее) письмо в две строки: номер и заголовок; диапазон дат и «×N». */
+.timeline__chip_deck {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.timeline__chip-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Цвета строки 2 наследуются от лица: читаются на любом статусном фоне и на тёмном «ВХ». */
+.timeline__chip-range {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  white-space: nowrap;
+  opacity: 0.72;
+}
+
+/* Счётчик писем колоды — контурная пилюля в цвете текста лица: читается и на статусных
+   заливках, и на тёмной плашке «ВХ». */
+.timeline__chip-count {
+  margin-left: auto;
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  line-height: var(--lh-caption);
+  white-space: nowrap;
+}
+
+/* Подложки колоды (не больше двух): ступенька вправо-вверх, видимая серая карточка с рамкой.
+   Горизонтальный вынос 8px < CHIP_GAP 12 — линия связи между позициями остаётся видна,
+   соседняя позиция не перекрыта. У развёрнутой позиции ступенька влево — чтобы не заходить
+   за дату. Вертикальный вынос 8px укладывается в ряд 56px (ROW_H_DECK). */
+.timeline__sheet {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--color-neutral-500);
+  border-radius: var(--radius-8);
+  background: var(--color-bg-secondary);
+  pointer-events: none;
+}
+
+.timeline__sheet_1 {
+  transform: translate(4px, -4px);
+}
+
+.timeline__sheet_2 {
+  transform: translate(8px, -8px);
+}
+
+/* Подложка в приглушённом цвете статуса лицевой плашки: стопка видна на белом треке. */
+.timeline__sheet_incoming {
+  border-color: var(--color-neutral-500);
+  background: var(--color-bg-secondary);
+}
+
+.timeline__sheet_inwork {
+  border-color: var(--st-inwork-solid);
+  background: var(--st-inwork-bg);
+}
+
+.timeline__sheet_done {
+  border-color: var(--st-done-solid);
+  background: var(--st-done-bg);
+}
+
+.timeline__sheet_overdue {
+  border-color: var(--st-overdue-solid);
+  background: var(--st-overdue-bg);
+}
+
+.timeline__sheet_reworked {
+  border-color: var(--st-reworked-solid);
+  background: var(--st-reworked-bg);
+}
+
+.timeline__pos_flip .timeline__sheet_1 {
+  transform: translate(-4px, -4px);
+}
+
+.timeline__pos_flip .timeline__sheet_2 {
+  transform: translate(-8px, -8px);
+}
+
+/* Метка даты (п.8): тонкий штрих по краю плашки, который стоит на дате письма (при развороте —
+   правому). Внутри плашки и в цвете её текста — не выглядит обрезкой и не спорит ни с одной
+   статусной заливкой, ни с тёмным «ВХ». */
+.timeline__date-mark {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 0;
+  width: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.timeline__pos_flip .timeline__date-mark {
+  left: auto;
+  right: 0;
+}
+
+.timeline__chip_inwork {
+  background: var(--st-inwork-solid);
+  color: var(--st-solid-fg);
+}
+
+.timeline__chip_done {
+  background: var(--st-done-solid);
+  color: var(--st-solid-fg);
+}
+
+.timeline__chip_overdue {
+  background: var(--st-overdue-solid);
+  color: var(--st-solid-fg);
+}
+
+.timeline__chip_reworked {
+  background: var(--st-reworked-solid);
+  color: var(--st-solid-fg);
+}
+
+/* Плашка входящего: вместо статуса — чип вида ВХ внутри (см. блок type-chip). */
+.timeline__chip_incoming {
+  background: var(--kind-in-bg);
+  color: var(--kind-in-fg);
+}
+
+.timeline__chip-reg {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.timeline__chip-topic {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline__empty {
+  padding: 40px 20px;
+  text-align: center;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}

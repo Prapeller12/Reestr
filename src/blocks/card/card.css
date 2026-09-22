@@ -1,0 +1,30 @@
+/* Белая карточка-контейнер (реестр, легенда, график, панели модалок).
+   Поверхность: белый блок на сером фоне страницы, радиус 24, граница едва заметная. */
+
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--radius-24);
+  overflow: hidden;
+}
+
+.card_shadow {
+  box-shadow: var(--shadow-xs);
+}
+
+.card__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  background: var(--c-surface);
+  flex-wrap: wrap;
+}
+
+.card__title {
+  font-size: var(--fs-subheading);
+  line-height: var(--lh-subheading);
+  font-weight: 700;
+  white-space: nowrap;
+}

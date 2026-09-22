@@ -1,0 +1,28 @@
+/* Чип вида документа ИСХ/ВХ (макет §6.1: класс .tp). Используется в реестре
+   (рядом с датой) и в выпадающем списке писем карточки. Статус размера 20. */
+
+.type-chip {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-6);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* ИСХ — нейтральный серый статус. */
+.type-chip_out {
+  background: var(--color-translucent-200);
+  color: var(--color-text-secondary);
+}
+
+/* ВХ — синий, по палитре «в работе». */
+.type-chip_in {
+  background: var(--st-inwork-bg);
+  color: var(--st-inwork-fg);
+}

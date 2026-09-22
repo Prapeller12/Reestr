@@ -1,0 +1,246 @@
+/* Печать. Реестр — отдельная семантическая <table> с повтором шапки колонок на каждом листе
+   (экранный CSS-грид этого не умеет). «Связи» — таймлайн, масштабированный под ширину листа.
+   Подключается последним — правила @media print должны выигрывать каскад. */
+
+/* Альбомная A4 — под широкий состав колонок реестра и таймлайн (пп.6,10,11). */
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
+/* Печатные таблицы реестра существуют только для печати — на экране скрыты. */
+.print-tables,
+.print-table {
+  display: none;
+}
+
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+
+  body,
+  .page {
+    background: #fff;
+    padding: 0;
+    /* Плашки статусов/типов несут смысл цветом — печатаем цвет как на экране. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Каркас (QA-3 п.2): на экране .page — колонка ровно 100vh с overflow:clip, скролл внутри
+     карточек. В печати — обычный блочный поток на всю высоту, иначе печать обрежется по экрану.
+     Главную карточку тоже в блок: печатная <table> с повтором thead должна стоять в блочном
+     потоке. Селектор (0,2,0) — чтобы перебить экранное .screen_fill > .screen__main. */
+  .page {
+    display: block;
+    height: auto;
+    max-width: none;
+    overflow: visible;
+  }
+
+  .screen_fill {
+    display: block;
+    min-height: 0;
+  }
+
+  .screen_fill > .screen__main {
+    display: block;
+    min-height: 0;
+  }
+
+  /* Отступ над главной карточкой — только если над ней есть печатаемая секция (легенда «Связей»);
+     у реестра секция фильтров print-hide, лишних 16px сверху нет. */
+  .screen_fill > :not(.print-hide) ~ .screen__main {
+    margin-top: 16px;
+  }
+
+  .page-header {
+    margin-bottom: 12px;
+  }
+
+  .card {
+    max-width: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* ---- Реестр: на каждую тему-группу своя <table> с повторяющейся на каждом листе шапкой ---- */
+
+  .print-tables {
+    display: block;
+  }
+
+  .print-table {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    color: var(--t-main);
+    /* Разделитель между тема-таблицами; браузер не начинает новый лист «вхолостую» —
+       page-break между таблицами не форсируем, пустых страниц не плодим. */
+    margin: 0 0 10px;
+  }
+
+  /* thead (две строки: тема + шапка колонок) печатается на КАЖДОМ листе группы — нативный
+     повтор темы и заголовков колонок (п.6а). Осиротевший заголовок темы исключён: тема —
+     часть <thead> и всегда идёт вместе со своими строками (Chromium/WebView2 не печатает
+     header-group на листе без строк тела). */
+  .print-table thead {
+    display: table-header-group;
+  }
+
+  /* Ширины колонок через <col> — надёжно для table-layout:fixed, даже когда первая строка
+     <thead> — это тема одной colspan-ячейкой. Порядок как на экране, без «Ссылки». Σ = 100%. */
+  .print-table col:nth-child(1) { width: 3%; }
+  .print-table col:nth-child(2) { width: 9%; }
+  .print-table col:nth-child(3) { width: 5%; }
+  .print-table col:nth-child(4) { width: 22%; }
+  .print-table col:nth-child(5) { width: 9%; }
+  .print-table col:nth-child(6) { width: 15%; }
+  .print-table col:nth-child(7) { width: 13%; }
+  .print-table col:nth-child(8) { width: 8%; }
+  .print-table col:nth-child(9) { width: 8%; }
+  .print-table col:nth-child(10) { width: 8%; }
+
+  .print-table__th {
+    text-align: left;
+    vertical-align: bottom;
+    padding: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--t-3);
+    border-bottom: 1.5px solid var(--b-muted);
+    overflow-wrap: anywhere;
+  }
+
+  /* Строка-разделитель темы (первая строка <thead>): имя темы + счётчик, во всю ширину. */
+  .print-table__group-cell {
+    text-align: left;
+    padding: 6px 4px 3px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--t-2);
+    border-bottom: 1px solid var(--b-muted);
+    background: var(--c-group);
+  }
+
+  /* Строка не разрывается между листами. */
+  .print-table__row {
+    break-inside: avoid;
+  }
+
+  .print-table__row > td {
+    padding: 3px 4px;
+    vertical-align: top;
+    border-bottom: 1px solid var(--b-row);
+    overflow-wrap: anywhere;
+  }
+
+  .print-table__num {
+    font-family: var(--font-mono);
+    color: var(--t-7);
+  }
+
+  .print-table__reg {
+    font-family: var(--font-mono);
+  }
+
+  /* Даты не рвутся по цифрам. */
+  .print-table__date {
+    white-space: nowrap;
+  }
+
+  .print-table__remaining_overdue {
+    color: var(--c-danger);
+  }
+
+  .print-table__remaining_soon {
+    color: var(--c-amber);
+  }
+
+  .status-badge {
+    padding: 1px 4px;
+    white-space: nowrap;
+  }
+
+  /* ---- «Связи» (таймлайн): весь граф вписан в ОДИН альбомный лист ---- */
+
+  /* Панель масштаба не нужна; легенда печатается компактной строкой над графом. */
+  .timeline-scale {
+    display: none;
+  }
+
+  .timeline-legend {
+    padding: 4px 2px;
+    gap: 10px;
+  }
+
+  /* Весь трек (ось + все дорожки со всеми плашками) ужимается transform:scale так, чтобы
+     ЦЕЛИКОМ уместиться в один альбомный лист — вписан И по ширине, И по высоте
+     (scale = min(1, ширина/ширина_графа, высота/высота_графа), считается в TimelineView).
+     Высота графа берётся по РЕАЛЬНОЙ высоте дорожек (диагональный каскад плашек), поэтому
+     контент не уезжает на второй лист и не обрезается. break-inside:avoid держит граф как
+     единый блок — ось и плашки всегда на одном листе, без пустых страниц. Экранные
+     sticky/скролл снимаем; высоту в потоке задаём под масштаб, чтобы не осталось пустого
+     «хвоста». */
+  .timeline__scroll {
+    overflow: visible;
+    transform: scale(var(--timeline-print-scale, 1));
+    transform-origin: top left;
+    height: calc(var(--timeline-print-h, 0px) * var(--timeline-print-scale, 1));
+    break-inside: avoid;
+  }
+
+  .timeline__axis,
+  .timeline__axis-side,
+  .timeline__lane-side {
+    position: static;
+  }
+
+  .timeline__axis,
+  .timeline__lane {
+    break-inside: avoid;
+  }
+
+  /* На экране плашки — насыщенная заливка с белым текстом; на ч/б принтере светлые
+     заливки (оранжевая, зелёная) сливаются с белым текстом. Для бумаги — приглушённый вариант:
+     светлая заливка + тёмный цветной текст + тонкая рамка цвета текста. */
+  .timeline__chip_inwork,
+  .timeline__chip_done,
+  .timeline__chip_overdue,
+  .timeline__chip_reworked,
+  .timeline-legend__swatch_inwork,
+  .timeline-legend__swatch_done,
+  .timeline-legend__swatch_overdue,
+  .timeline-legend__swatch_reworked {
+    border: 1px solid currentColor;
+  }
+
+  .timeline__chip_inwork,
+  .timeline-legend__swatch_inwork {
+    background: var(--st-inwork-bg);
+    color: var(--st-inwork-fg);
+  }
+
+  .timeline__chip_done,
+  .timeline-legend__swatch_done {
+    background: var(--st-done-bg);
+    color: var(--st-done-fg);
+  }
+
+  .timeline__chip_overdue,
+  .timeline-legend__swatch_overdue {
+    background: var(--st-overdue-bg);
+    color: var(--st-overdue-fg);
+  }
+
+  .timeline__chip_reworked,
+  .timeline-legend__swatch_reworked {
+    background: var(--st-reworked-bg);
+    color: var(--st-reworked-fg);
+  }
+}

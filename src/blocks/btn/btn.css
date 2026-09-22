@@ -1,0 +1,180 @@
+/* Кнопки дизайн-системы Реестра:
+   primary — красная (главное действие экрана), accent — её синоним,
+   secondary — полупрозрачная серая заливка без рамки, transparent/«опасная» — без фона.
+   Размер по умолчанию 40 (радиус 10), btn_lg — 48, иконка/ссылка — 32 (радиус 8). */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: var(--size-40);
+  padding: 0 19px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-10);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration) var(--ease),
+    border-color var(--duration) var(--ease),
+    color var(--duration) var(--ease);
+}
+
+.btn:disabled {
+  background: var(--color-translucent-100);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.btn_primary,
+.btn_accent {
+  background: var(--c-btn);
+  color: #ffffff;
+}
+
+.btn_primary:hover,
+.btn_accent:hover {
+  background: var(--c-btn-hover);
+}
+
+.btn_primary:active,
+.btn_accent:active {
+  background: var(--c-btn-press);
+}
+
+/* Тёмная кнопка — для второстепенных «сильных» действий. */
+.btn_dark {
+  background: var(--color-dark);
+  color: var(--color-text-inverted);
+}
+
+.btn_dark:hover {
+  background: var(--color-dark-hover);
+}
+
+.btn_dark:active {
+  background: var(--color-dark-press);
+}
+
+.btn_secondary {
+  background: var(--color-translucent-300);
+  color: var(--color-text-primary);
+}
+
+.btn_secondary:hover {
+  background: rgba(30, 45, 80, 0.15);
+}
+
+.btn_secondary:active {
+  background: var(--color-translucent-400);
+}
+
+.btn_danger-ghost {
+  color: var(--color-text-negative);
+}
+
+.btn_danger-ghost:hover {
+  background: var(--color-muted-negative);
+}
+
+.btn_danger-ghost:active {
+  background: var(--color-muted-alt-negative);
+}
+
+/* Залитая «опасная» — необратимое действие («Удалить» тему, QA-3 п.9). Заливка почти совпадает
+   с primary-акцентом — для деструктивной кнопки Альфы это осознанно; text-токен как заливка
+   контрастнее под белым текстом, чем --color-status-negative. :not(:disabled) — чтобы наведение
+   не красило неактивную кнопку (.btn:disabled стоит раньше модификаторов). */
+.btn_danger {
+  background: var(--color-text-negative);
+  color: var(--color-text-inverted);
+}
+
+.btn_danger:hover:not(:disabled),
+.btn_danger:active:not(:disabled) {
+  background: var(--color-text-negative-hover);
+}
+
+.btn_off {
+  background: var(--color-translucent-100);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+/* Кнопка импорта из 1С. Подложка светлая: официальный знак «1С» — красный, и по гайдлайну
+   правообладателя показывается в своём цвете на чистом светлом фоне, без перекраски.
+   Акцент кнопке даёт сам знак, поэтому цветная заливка не нужна. На сером фоне страницы
+   кнопка белая. */
+.btn_1c {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.btn_1c:hover {
+  background: var(--color-neutral-300);
+}
+
+.btn_1c:active {
+  background: var(--color-bg-quaternary);
+}
+
+/* Знак 1С — растр 1063×591 из фирменного архива; высота задана, ширина по пропорции. */
+.btn__1c-logo {
+  height: 16px;
+  width: auto;
+  display: block;
+}
+
+.btn_lg {
+  min-height: var(--size-48);
+  padding: 0 23px;
+}
+
+/* Ссылка-кнопка: только цвет ссылки, подложка на ховере. */
+.btn_link {
+  min-height: var(--size-32);
+  padding: 0 11px;
+  border-radius: var(--radius-8);
+  color: var(--color-text-link);
+}
+
+.btn_link:hover {
+  background: var(--color-translucent-100);
+  color: var(--color-text-link-hover);
+}
+
+.btn__glyph {
+}
+
+/* Монохромная inline-SVG-иконка в кнопке (принтер, шестерёнка) — наследует currentColor. */
+.btn__ico {
+  flex: 0 0 auto;
+  display: block;
+}
+
+/* Крестик закрытия в шапках модалок и drawer: прозрачная кнопка-иконка 32×32. */
+.btn_icon {
+  width: var(--size-32);
+  min-width: var(--size-32);
+  min-height: var(--size-32);
+  height: var(--size-32);
+  padding: 0;
+  border-radius: var(--radius-8);
+  color: var(--color-text-secondary);
+}
+
+.btn_icon:hover {
+  background: var(--color-translucent-100);
+  color: var(--color-text-primary);
+}
+
+.btn_icon:active {
+  background: var(--color-translucent-200);
+}

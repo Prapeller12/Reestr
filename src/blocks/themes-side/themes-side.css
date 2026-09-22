@@ -1,0 +1,267 @@
+/* Правая панель окна тем: перенос писем в тему, снятие, удаление (корзина + подтверждение
+   в плашке, QA-3 п.9), создание темы. Пункты тем — плашки-контейнеры с двумя кнопками
+   («назначить» и корзина); «Убрать тему» — прозрачная кнопка с красным текстом;
+   «Создать тему» — поле ввода + primary-кнопка.
+   Высота (QA-3 п.6): панель не выше тела окна; цепочка .themes-side (max-height 100%) →
+   __section_list (min-height 0 — без этого звена список не сожмётся) → __list (скролл). */
+
+.themes-side {
+  align-self: start;
+  max-height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.themes-side__head {
+  flex: none;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  font-size: var(--fs-subheading);
+  line-height: var(--lh-subheading);
+  font-weight: 700;
+}
+
+.themes-side__section {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.themes-side__section_bordered {
+  border-bottom: 1px solid var(--color-border-tertiary);
+}
+
+/* Секция со списком тем: сжимается, список внутри скроллится. */
+.themes-side__section_list {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.themes-side__section_new {
+  flex: none;
+}
+
+.themes-side__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Подпись секции — капс 12/16 с разрядкой. */
+.themes-side__label {
+  flex: none;
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+}
+
+/* Плашка темы — контейнер: «назначить» (имя + счётчик) и корзина. */
+.themes-side__theme {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 4px;
+  border-radius: var(--radius-10);
+  background: var(--color-translucent-100);
+  transition: background-color var(--duration) var(--ease);
+}
+
+.themes-side__theme:hover {
+  background: var(--color-translucent-300);
+}
+
+.themes-side__theme_idle {
+  background: transparent;
+}
+
+/* Подтверждение удаления — после _idle: равная специфичность решается порядком,
+   :hover — чтобы .themes-side__theme:hover (0,2,0) не перебил фон. */
+.themes-side__theme_confirm,
+.themes-side__theme_confirm:hover {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px;
+  background: var(--color-muted-negative);
+}
+
+/* Кнопка «назначить»: сброс кнопки, имя обрезается многоточием (полное — в title). */
+.themes-side__assign {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: var(--size-40);
+  padding: 0 8px 0 12px;
+  border: none;
+  border-radius: var(--radius-10);
+  background: transparent;
+  font: inherit;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.themes-side__theme-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+}
+
+.themes-side__theme-count {
+  flex: none;
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-tertiary);
+}
+
+/* Корзина — видна всегда (решение (б)); красная на наведении. */
+.themes-side__delete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-32);
+  height: var(--size-32);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-8);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration) var(--ease),
+    color var(--duration) var(--ease);
+}
+
+.themes-side__delete:hover:not(:disabled) {
+  background: var(--color-muted-negative);
+  color: var(--color-text-negative);
+}
+
+.themes-side__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Имя в вопросе не обрезается — переносится: видно, что удаляется. */
+.themes-side__confirm-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  overflow-wrap: anywhere;
+}
+
+.themes-side__confirm-question {
+  font-size: var(--fs-subheading);
+  line-height: var(--lh-subheading);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.themes-side__confirm-detail {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+}
+
+.themes-side__confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.themes-side__clear {
+  flex: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--size-40);
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius-10);
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 500;
+  color: var(--color-text-negative);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration) var(--ease);
+}
+
+.themes-side__clear:hover {
+  background: var(--color-muted-negative);
+}
+
+/* Поле + «Создать тему»: в узкой панели кнопка переносится под поле. */
+.themes-side__new {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.themes-side__input {
+  flex: 1 1 120px;
+  min-width: 0;
+  box-sizing: border-box;
+  height: var(--size-48);
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--input-radius);
+  background: var(--input-bg);
+  box-shadow: var(--input-line);
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-primary);
+  transition:
+    background-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
+}
+
+.themes-side__input:hover {
+  background: var(--input-bg-hover);
+}
+
+.themes-side__input:focus {
+  background: var(--input-bg-focus);
+  box-shadow: var(--input-line-focus);
+}
+
+.themes-side__input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.themes-side__note {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-secondary);
+  text-wrap: pretty;
+}
+
+.themes-side__error {
+  font-size: var(--fs-secondary);
+  line-height: var(--lh-secondary);
+  color: var(--color-text-negative);
+}

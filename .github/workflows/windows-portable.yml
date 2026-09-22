@@ -1,0 +1,44 @@
+name: Build Windows portable
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      runtime_cab_url:
+        description: 'Optional official Microsoft Fixed Version x64 CAB URL'
+        required: false
+        type: string
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Set up Rust MSVC
+        shell: pwsh
+        run: |
+          rustup toolchain install stable --profile minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          rustup default stable
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          rustup target add x86_64-pc-windows-msvc
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Tests, build and portable ZIP
+        shell: pwsh
+        env:
+          REESTR_RUNTIME_CAB_URL: ${{ inputs.runtime_cab_url }}
+        run: ./scripts/build-windows.ps1 -RuntimeCabUrl $env:REESTR_RUNTIME_CAB_URL
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Reestr-Windows-x64
+          path: |
+            release-*/Reestr-Windows-x64.zip
+            release-*/Reestr-Windows-x64.zip.sha256
+          if-no-files-found: error
+          retention-days: 14

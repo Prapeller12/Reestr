@@ -1,0 +1,39 @@
+/* Полоса вкладок: «Реестр» / «Связи». Сегментный переключатель:
+   серая капсула r99 с отступом 2px, внутри — пилюли;
+   активная — тёмная (pill_active), остальные — без заливки. Высота 40. */
+
+.tab-strip {
+  flex: none;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+}
+
+.tab-strip__seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-translucent-200);
+}
+
+.tab-strip__item {
+  min-height: 36px;
+  padding: 0 16px;
+  font-weight: 500;
+}
+
+.tab-strip__item:not(.pill_active) {
+  background: transparent;
+}
+
+.tab-strip__item:not(.pill_active):hover {
+  background: var(--color-translucent-200);
+}
+
+/* Иконка раздела внутри пилюли — наследует currentColor (инверсия при pill_active). */
+.tab-strip__ico {
+  flex: 0 0 auto;
+  display: block;
+}

@@ -1,0 +1,7 @@
+# Максимальная переносимость reestr.exe.
+# Статически линкуем MSVC C Runtime (CRT) → exe НЕ зависит от vcruntime140.dll /
+# msvcp140.dll на целевом ПК. Важно для старых/необновлённых Windows 10, где
+# VC++ Redistributable может отсутствовать. Крейт `cc` (сборка bundled SQLite)
+# уважает этот флаг и компилирует C с /MT (статический CRT) — весь бинарь автономен.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]

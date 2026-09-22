@@ -1,0 +1,46 @@
+/* Бейдж статуса: приглушённая заливка + насыщенный текст.
+   Размер 24 (радиус 6), крупный вариант — 32 (радиус 10). Модификатор по enum backend. */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: var(--size-24);
+  padding: 0 8px;
+  border-radius: var(--radius-6);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  white-space: nowrap;
+  background: var(--color-translucent-200);
+  color: var(--color-text-secondary);
+}
+
+.status-badge_done {
+  background: var(--st-done-bg);
+  color: var(--st-done-fg);
+}
+
+.status-badge_inwork {
+  background: var(--st-inwork-bg);
+  color: var(--st-inwork-fg);
+}
+
+.status-badge_overdue {
+  background: var(--st-overdue-bg);
+  color: var(--st-overdue-fg);
+}
+
+.status-badge_reworked {
+  background: var(--st-reworked-bg);
+  color: var(--st-reworked-fg);
+}
+
+/* Крупный вариант — статус-полоса карточки документа. */
+.status-badge_lg {
+  height: var(--size-32);
+  padding: 0 12px;
+  border-radius: var(--radius-10);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
