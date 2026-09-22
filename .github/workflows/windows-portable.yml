@@ -42,3 +42,27 @@ jobs:
             release-*/Reestr-Windows-x64.zip.sha256
           if-no-files-found: error
           retention-days: 14
+
+  smoke:
+    needs: build
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: Reestr-Windows-x64
+          path: package
+      - name: Verify archive and application startup
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem package -Recurse -Filter Reestr-Windows-x64.zip
+          if (@($zip).Count -ne 1) { throw 'Expected one portable ZIP.' }
+          $expected = (Get-Content ($zip.FullName + '.sha256')).Split(' ')[0]
+          if ((Get-FileHash $zip.FullName -Algorithm SHA256).Hash -ne $expected) { throw 'ZIP checksum mismatch.' }
+          $destination = Join-Path $env:RUNNER_TEMP 'Reestr smoke test'
+          Expand-Archive -LiteralPath $zip.FullName -DestinationPath $destination
+          ./scripts/smoke-windows.ps1 -PortablePath (Join-Path $destination 'Reestr-Windows-x64')
