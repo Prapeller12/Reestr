@@ -6,6 +6,7 @@ import TypeChip from '../registry/TypeChip';
 
 interface Props {
   chip: TimelineChipModel;
+  expanded?: boolean;
   onOpen: (kind: DocKind, regNumber: string) => void;
   onDeck: (chip: TimelineChipModel) => void;
 }
@@ -13,7 +14,7 @@ interface Props {
 // Позиция ряда: одиночная плашка письма или «колода» из нескольких писем (QA-3 п.3). На дате
 // стоит левый край (у правого края трека — правый, flip), там же — метка даты (п.8).
 // Координаты (left/top) и разворот — вычисляемая геометрия, единственное допустимое inline-style.
-function TimelineChip({ chip, onOpen, onDeck }: Props) {
+function TimelineChip({ chip, onOpen, onDeck, expanded }: Props) {
   // У входящего статуса нет (§2) — свой модификатор вида, вне четвёрки статусов.
   const mod = chip.status === null ? 'incoming' : statusMod(chip.status);
   const deck = chip.count > 1;
@@ -39,6 +40,7 @@ function TimelineChip({ chip, onOpen, onDeck }: Props) {
         type="button"
         className={`timeline__chip timeline__chip_${mod}${deck ? ' timeline__chip_deck' : ''}`}
         title={chip.title}
+        aria-expanded={deck ? expanded : undefined}
         aria-label={
           deck
             ? `${lettersLabel(chip.count)}, ${chip.rangeLabel}, последнее ${chip.regLabel}`

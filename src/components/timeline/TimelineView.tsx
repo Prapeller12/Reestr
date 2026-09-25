@@ -1,7 +1,7 @@
 import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import type { DocKind } from '../../api/types';
-import { chipSpan, collectChains, deckPositions, layoutTimeline, splitZoom } from '../../lib/timeline';
+import { chipSpan, collectChains, deckPositions, layoutTimeline, layoutTimelineRows, splitZoom } from '../../lib/timeline';
 import type {
   DeckTarget,
   TimelineChipModel,
@@ -59,6 +59,8 @@ function TimelineView({ groups, todayEpoch, zoom, onZoom, hideClosed, onToggleHi
     () => (todayEpoch === null ? null : layoutTimeline(chains, todayEpoch, zoom, hideClosed)),
     [chains, todayEpoch, zoom, hideClosed],
   );
+
+  const rows = useMemo(() => model ? layoutTimelineRows(model, chains) : [], [model, chains]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   // Колода, к которой нужно прокрутить после смены масштаба (без state: не нужен лишний рендер).
@@ -214,6 +216,11 @@ function TimelineView({ groups, todayEpoch, zoom, onZoom, hideClosed, onToggleHi
               trackWidth={model.trackWidth}
               todayLeft={model.todayLeft}
             />
+            {rows.map((row) => (
+              <TimelineLane key={`screen-${zoom}-${row.name}`} lane={row} row={row}
+                ticks={model.ticks} trackWidth={model.trackWidth} todayLeft={model.todayLeft}
+                onOpenDoc={onOpenDoc} onDeck={handleDeck} />
+            ))}
             {model.lanes.map((lane) => (
               <TimelineLane
                 key={lane.name}

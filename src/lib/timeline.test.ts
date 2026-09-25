@@ -5,6 +5,7 @@ import {
   CHIP_GAP,
   ZOOM_ORDER,
   buildTimeline,
+  layoutTimelineRows,
   chipSpan,
   collectChains,
   deckPositions,
@@ -468,5 +469,63 @@ describe('meta дорожки', () => {
     const m = build([lane('Т', [out('T', '2026-09-10', [], 'inWork')])], 'quarter');
     expect(m.lanes[0]?.meta).toBe('1 письмо · в работе');
     expect(m.lanes[0]?.alert).toBe(false);
+  });
+});
+
+
+describe('экранная горизонтальная строка темы', () => {
+  const rowModel = (groups: TimelineLaneInput[], zoom: TimelineZoom = 'week', hide = false) => {
+    const original = build(groups, zoom, hide);
+    return { original, rows: layoutTimelineRows(original, collectChains(groups)) };
+  };
+
+  it('независимые письма на одной дате раскрываются отдельно и не получают ложных связей', () => {
+    const { rows } = rowModel([lane('Тема', [out('1', '2026-09-01'), out('2', '2026-09-01'), inc('2', '2026-09-01')])]);
+    expect(rows[0]!.groups).toHaveLength(1);
+    expect(rows[0]!.groups[0]!.members.map((m) => m.id)).toEqual(['outgoing:1', 'outgoing:2', 'incoming:2']);
+    expect(rows[0]!.chips[0]!.count).toBe(3);
+    expect(rows[0]!.links).toEqual([]);
+  });
+
+  it('разнесённые письма стоят в одном ряду точно на своих датах; печать не меняется', () => {
+    const groups = [lane('Тема', [out('1', '2026-01-01'), out('2', '2026-05-01'), out('3', '2026-09-01')])];
+    const { original, rows } = rowModel(groups);
+    const before = JSON.stringify(original);
+    layoutTimelineRows(original, collectChains(groups));
+    expect(JSON.stringify(original)).toBe(before);
+    expect(new Set(rows[0]!.chips.map((c) => c.top)).size).toBe(1);
+    expect(new Set(original.lanes[0]!.chips.map((c) => c.top)).size).toBe(3);
+    for (const c of rows[0]!.chips) expect(c.left).toBe(Math.round((c.firstEpoch - original.lo) * original.ppd));
+  });
+
+  it('собирает транзитивные пересечения и сохраняет даты и статусы каждого письма', () => {
+    const { rows } = rowModel([lane('Тема', [out('1', '2026-09-01'), out('2', '2026-09-06', [], 'overdue'), out('3', '2026-09-11')])]);
+    expect(rows[0]!.groups).toHaveLength(1);
+    expect(rows[0]!.groups[0]!.members.map((c) => [c.regNumber, c.firstEpoch, c.status])).toEqual([
+      ['1', E('2026-09-01'), 'inWork'], ['2', E('2026-09-06'), 'overdue'], ['3', E('2026-09-11'), 'inWork'],
+    ]);
+  });
+
+  it('учитывает фильтр завершённых цепочек и не объединяет разные темы', () => {
+    const groups = [lane('A', [out('1', '2026-09-01', [['incoming', '2']], 'done'), inc('2', '2026-09-02'), out('3', '2026-09-02')]), lane('B', [out('4', '2026-09-02')])];
+    const { rows } = rowModel(groups, 'month', true);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]!.groups.flatMap((g) => g.chip.memberIds)).toEqual(['outgoing:3']);
+    expect(rows[1]!.groups.flatMap((g) => g.chip.memberIds)).toEqual(['outgoing:4']);
+  });
+
+  it('сохраняет все письма и не оставляет пересечений колод на всех масштабах', () => {
+    const docs = Array.from({ length: 100 }, (_, i) => out(String(i), `2026-09-${String(1 + i % 28).padStart(2, '0')}`));
+    for (const zoom of ZOOM_ORDER) {
+      const { rows, original } = rowModel([lane('Тема', docs)], zoom);
+      const row = rows[0]!;
+      expect(new Set(row.groups.flatMap((g) => g.chip.memberIds)).size).toBe(100);
+      const spans = row.chips.map(chipSpan).sort((a, b) => a.left - b.left);
+      spans.forEach((span, i) => {
+        expect(span.left).toBeGreaterThanOrEqual(0);
+        expect(span.right).toBeLessThanOrEqual(original.trackWidth);
+        if (i) expect(span.left).toBeGreaterThanOrEqual(spans[i - 1]!.right + CHIP_GAP);
+      });
+    }
   });
 });

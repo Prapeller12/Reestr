@@ -548,3 +548,55 @@ export function splitZoom(
 export function laneCount(groups: TimelineLaneInput[]): number {
   return groups.filter((g) => g.docs.some((d) => isoToEpochDay(d.regDate) !== null)).length;
 }
+
+/** Экранная строка темы. Печатная раскладка остаётся в layoutTimeline. */
+export interface TimelineRowModel extends TimelineLaneModel {
+  groups: { chip: TimelineChipModel; members: TimelineChipModel[] }[];
+}
+
+export function layoutTimelineRows(model: TimelineModel, chains: LaneChains[]): TimelineRowModel[] {
+  return model.lanes.map((lane) => {
+    const visible = new Set(lane.chips.flatMap((chip) => chip.memberIds));
+    const letters = (chains.find((c) => c.name === lane.name)?.letters ?? [])
+      .filter((letter) => visible.has(letter.key));
+    const singles = letters.map(({ doc, key, dateEpoch }): TimelineChipModel => {
+      const left = Math.round((dateEpoch - model.lo) * model.ppd);
+      return {
+        id: key, regNumber: doc.regNumber, kind: doc.kind, regLabel: `№ ${doc.regNumber}`,
+        topic: doc.topic, status: doc.status, title: singleTitle(doc), left, top: 36,
+        flip: left + CHIP_W > model.trackWidth, count: 1, sheets: 0, rangeLabel: '',
+        memberIds: [key], firstEpoch: dateEpoch, lastEpoch: dateEpoch,
+      };
+    });
+    // Пересечения считаем по реальным границам, включая разворот у правого края.
+    // Группа может содержать независимые цепочки: это только визуальное перекрытие.
+    const clusters: { members: TimelineChipModel[]; right: number }[] = [];
+    for (const chip of [...singles].sort((a, b) => chipSpan(a).left - chipSpan(b).left)) {
+      const span = chipSpan(chip);
+      const previous = clusters[clusters.length - 1];
+      if (previous && span.left < previous.right + CHIP_GAP) {
+        previous.members.push(chip);
+        previous.right = Math.max(previous.right, span.right);
+      } else clusters.push({ members: [chip], right: span.right });
+    }
+    const order = new Map(letters.map((letter, i) => [letter.key, i]));
+    const groups = clusters.map(({ members }) => {
+      members.sort((a, b) => order.get(a.id)! - order.get(b.id)!);
+      const first = members[0]!;
+      const last = members[members.length - 1]!;
+      const count = members.length;
+      const chip: TimelineChipModel = count === 1 ? first : {
+        ...last, id: first.id, left: first.left, flip: first.flip,
+        firstEpoch: first.firstEpoch, count, sheets: count > 2 ? 2 : 1,
+        memberIds: members.map((m) => m.id), rangeLabel: rangeOf(first.firstEpoch, last.lastEpoch),
+        title: `${lettersLabel(count)} · ${rangeOf(first.firstEpoch, last.lastEpoch)}\nНаведите указатель или нажмите, чтобы раскрыть`,
+      };
+      return { chip, members };
+    });
+    return {
+      ...lane, height: 88, chips: groups.map((g) => g.chip), groups,
+      links: lane.links.map((link) => ({ ...link, top: 36 })),
+      tail: lane.tail ? { ...lane.tail, top: 36 } : null,
+    };
+  });
+}
