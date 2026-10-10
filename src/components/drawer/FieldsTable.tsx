@@ -1,3 +1,4 @@
+import { useAccess } from '../access/AccessProvider';
 import { Fragment, useState } from 'react';
 import { clearDeadline, setDeadline } from '../../api/commands';
 import { toApiError } from '../../api/errors';
@@ -20,6 +21,7 @@ type Editing = 'signer' | 'addressees' | 'deadline' | null;
 // У ИСХОДЯЩИХ Подписант/Адресаты редактируются инлайн (§3), Срок исполнения ставится календарём (§4)
 // с даты регистрации письма (QA-3 п.1: прошлые даты разрешены, раньше regDate — нельзя).
 function FieldsTable({ doc, todayEpoch, onChanged }: Props) {
+  const {canEdit}=useAccess();
   const [editing, setEditing] = useState<Editing>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +56,11 @@ function FieldsTable({ doc, todayEpoch, onChanged }: Props) {
       setBusy(false);
     }
   };
+
+  if (!canEdit && doc.kind === 'outgoing') {
+    const fields = [['Регистрационный номер',doc.regNumber],['Дата регистрации',formatIsoDate(doc.regDate)],['Срок исполнения',formatIsoDate(doc.dueDate)],['Получатель',doc.counterparty],['Заголовок',doc.topic],['Подписант',doc.signer],['Адресаты',doc.addressees],['Ссылка',doc.ref]];
+    return <div className="doc-fields"><div className="doc-fields__head">Поле</div><div className="doc-fields__head">Значение</div><div className="doc-fields__head"/>{fields.map(([k,v])=><Fragment key={k}><div className="doc-fields__key">{k}</div><div className="doc-fields__value">{v||'—'}</div><div className="doc-fields__action"/></Fragment>)}</div>;
+  }
 
   if (doc.kind === 'incoming') {
     const fields: { k: string; v: string }[] = [

@@ -41,7 +41,7 @@ function RegistryView({
           <div className="registry-table__inner">
             {groups.length === 0 ? (
               <div className="registry-table__empty">
-                Реестр пуст. Импортируйте выгрузку из 1С.
+                Реестр пуст. Импорт писем выполняет администратор.
               </div>
             ) : (
               groups.map((g) => (

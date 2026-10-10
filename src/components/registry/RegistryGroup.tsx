@@ -1,3 +1,4 @@
+import { useAccess } from '../access/AccessProvider';
 import type { DocKind, DocumentView } from '../../api/types';
 import { lettersLabel } from '../../lib/texts';
 import RegistryRow from './RegistryRow';
@@ -33,6 +34,7 @@ const COLUMNS = [
 
 // Группа темы: сворачиваемая шапка (шеврон вниз/вправо) + кнопка «настроить тему» + шапка колонок + строки.
 function RegistryGroup({ name, rows, open, onToggle, onConfigure, onOpenDoc }: Props) {
+  const {canEdit}=useAccess();
   const countLabel = lettersLabel(rows.length);
   return (
     <div className="registry-table__group">
@@ -49,7 +51,7 @@ function RegistryGroup({ name, rows, open, onToggle, onConfigure, onOpenDoc }: P
             <span className="registry-table__group-name">{name}</span>
             <span className="registry-table__group-count">{countLabel}</span>
           </button>
-          <button
+          {canEdit ? <button
             type="button"
             className="registry-table__group-config print-hide"
             title="Распределить письма по темам"
@@ -59,7 +61,7 @@ function RegistryGroup({ name, rows, open, onToggle, onConfigure, onOpenDoc }: P
             }}
           >
           <Icon name="settings" size={20} className="btn__ico" />
-        </button>
+        </button> : null}
         </div>
       </div>
 

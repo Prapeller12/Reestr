@@ -551,13 +551,14 @@ export function laneCount(groups: TimelineLaneInput[]): number {
 
 /** Экранная строка темы. Печатная раскладка остаётся в layoutTimeline. */
 export interface TimelineRowModel extends TimelineLaneModel {
-  groups: { chip: TimelineChipModel; members: TimelineChipModel[] }[];
+  groups: { chip: TimelineChipModel; members: TimelineChipModel[]; chains: TimelineUnfoldChain[] }[];
 }
 
 export function layoutTimelineRows(model: TimelineModel, chains: LaneChains[]): TimelineRowModel[] {
   return model.lanes.map((lane) => {
     const visible = new Set(lane.chips.flatMap((chip) => chip.memberIds));
-    const letters = (chains.find((c) => c.name === lane.name)?.letters ?? [])
+    const source = chains.find((c) => c.name === lane.name);
+    const letters = (source?.letters ?? [])
       .filter((letter) => visible.has(letter.key));
     const singles = letters.map(({ doc, key, dateEpoch }): TimelineChipModel => {
       const left = Math.round((dateEpoch - model.lo) * model.ppd);
@@ -591,7 +592,7 @@ export function layoutTimelineRows(model: TimelineModel, chains: LaneChains[]): 
         memberIds: members.map((m) => m.id), rangeLabel: rangeOf(first.firstEpoch, last.lastEpoch),
         title: `${lettersLabel(count)} · ${rangeOf(first.firstEpoch, last.lastEpoch)}\nНаведите указатель или нажмите, чтобы раскрыть`,
       };
-      return { chip, members };
+      return { chip, members, chains: splitUnfoldChains(members, source?.letters.map(l => l.doc) ?? []) };
     });
     return {
       ...lane, height: 88, chips: groups.map((g) => g.chip), groups,
@@ -599,4 +600,32 @@ export function layoutTimelineRows(model: TimelineModel, chains: LaneChains[]): 
       tail: lane.tail ? { ...lane.tail, top: 36 } : null,
     };
   });
+}
+
+
+export interface TimelineUnfoldChain { id: string; label: string; members: TimelineChipModel[] }
+
+/** Компоненты связности по реальным LINK, включая развилки, общие ответы и циклы.
+ * Даты и близость карточек не создают связь. Полный граф сохраняет связь через скрытое письмо. */
+export function splitUnfoldChains(members: TimelineChipModel[], docs: DocumentView[]): TimelineUnfoldChain[] {
+  const parent = new Map(docs.map(d => { const key=docKey(d.kind,d.regNumber); return [key,key]; }));
+  const find = (key: string): string => {
+    let root=key;
+    while(parent.has(root) && parent.get(root)!==root) root=parent.get(root)!;
+    let current=key;
+    while(parent.has(current) && parent.get(current)!==root) {const next=parent.get(current)!;parent.set(current,root);current=next;}
+    return root;
+  };
+  for(const doc of docs) for(const link of doc.links) {
+    const a=docKey(doc.kind,doc.regNumber),b=docKey(link.letterKind,link.letterReg);
+    if(parent.has(b)) parent.set(find(b),find(a));
+  }
+  const rows = new Map<string, TimelineUnfoldChain>();
+  for(const member of members) {
+    const id=find(member.id);
+    let row=rows.get(id);
+    if(!row) {row={id,label:`Цепочка от ${member.regLabel}`,members:[]};rows.set(id,row);}
+    row.members.push(member);
+  }
+  return [...rows.values()];
 }

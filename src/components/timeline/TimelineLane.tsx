@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react';
 import type { DocKind } from '../../api/types';
 import type { TimelineChipModel, TimelineLaneModel, TimelineTick } from '../../lib/timeline';
 import TimelineChip from './TimelineChip';
@@ -17,6 +18,11 @@ interface Props {
 // Дорожка темы: закреплённая слева подпись + трек с сеткой, связями,
 // пунктиром «тишины» и позициями писем (плашки и колоды).
 function TimelineLane({ lane, row, ticks, trackWidth, todayLeft, onOpenDoc, onDeck }: Props) {
+  const [expanded, setExpanded] = useState<Record<string, number>>({});
+  const onExpandedHeight = useCallback((id: string, height: number) => {
+    setExpanded(previous => previous[id] === height ? previous : {...previous, [id]: height});
+  }, []);
+  const height = Math.max(lane.height, ...Object.values(expanded));
   // id позиции уникален только внутри дорожки — клик по колоде несёт имя дорожки.
   const handleDeck = (chip: TimelineChipModel) => onDeck(lane.name, chip);
   return (
@@ -34,7 +40,7 @@ function TimelineLane({ lane, row, ticks, trackWidth, todayLeft, onOpenDoc, onDe
           {lane.meta}
         </div>
       </div>
-      <div className="timeline__track" style={{ height: `${lane.height}px` }}>
+      <div className="timeline__track" style={{ height: `${height}px` }}>
         {ticks.map((t) =>
           t.lead ? null : (
             <div key={t.left} className="timeline__grid-line" style={{ left: `${t.left}px` }} />
@@ -58,8 +64,8 @@ function TimelineLane({ lane, row, ticks, trackWidth, todayLeft, onOpenDoc, onDe
             }}
           />
         ) : null}
-        {row ? row.groups.map(({ chip, members }) => chip.count > 1 ? (
-          <TimelineDeck key={chip.id} chip={chip} members={members} onOpen={onOpenDoc} />
+        {row ? row.groups.map(({ chip, chains }) => chip.count > 1 ? (
+          <TimelineDeck key={chip.id} chip={chip} chains={chains} onOpen={onOpenDoc} onExpandedHeight={onExpandedHeight} />
         ) : (
           <TimelineChip key={chip.id} chip={chip} onOpen={onOpenDoc} onDeck={handleDeck} />
         )) : lane.chips.map((chip) => (

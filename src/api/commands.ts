@@ -159,3 +159,9 @@ export function getCompare(batchId?: number): Promise<CompareResult> {
 export function getPrintModel(filters?: RegistryFilters): Promise<PrintModel> {
   return call('get_print_model', { filters });
 }
+
+export function getAccess(): Promise<import('./types').AccessStatus> { return call('get_access'); }
+export function setupAdmin(password: string): Promise<import('./types').AccessStatus> { return call('setup_admin', { password }); }
+export function loginAdmin(password: string): Promise<import('./types').AccessStatus> { return call('login_admin', { password }); }
+export function logoutAdmin(): Promise<import('./types').AccessStatus> { return call('logout_admin'); }
+export function frontendReady(): Promise<void> { return call('frontend_ready'); }

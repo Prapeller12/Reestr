@@ -1,12 +1,4 @@
-// Ядро приложения «Реестр писем» (Tauri v2).
-// Порядок старта (backend.md §3, §4):
-//   1) папка программы = current_exe().parent() (НИКОГДА current_dir);
-//   2) env WebView2 выставляем ДО постройки webview (профиль в ./data/webview,
-//      вшитый Fixed Runtime вместо системного Edge);
-//   3) создаём ./data и ./imports;
-//   4) открываем/мигрируем ./data/registry.db;
-//   5) регистрируем 22 команды и поднимаем окно (18 базовых + правка полей/справочник, батч 2
-//      + удаление темы, QA-3 F4).
+// Реестр писем: SMB snapshots, local WebView2 and administrator-only writes.
 
 // Небольшие внутренние helper'ы (конструкторы ошибок, EXPECTED_HEADERS и т.п.)
 // могут не использоваться во всех сборках — не шумим предупреждениями.
@@ -19,13 +11,15 @@ mod dto;
 mod error;
 mod import;
 mod model;
+mod network;
 mod repo;
+mod smoke;
 mod state;
 mod util;
 mod view;
 
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use tauri::Manager;
 
 use state::AppState;
 
@@ -63,7 +57,7 @@ fn find_fixed_webview2(dir: &Path) -> Option<PathBuf> {
 /// один раз на каждую машину (маркер по имени ПК), рекурсивно, без прав админа и
 /// без единой команды от пользователя. На Windows 11 — безвредный no-op.
 #[cfg(target_os = "windows")]
-fn ensure_webview2_acl(runtime: &Path) {
+fn ensure_webview2_acl(runtime: &Path) -> Result<(), String> {
     use std::os::windows::process::CommandExt;
     const CREATE_NO_WINDOW: u32 = 0x0800_0000; // не мигать консолью из GUI-процесса
 
@@ -71,12 +65,12 @@ fn ensure_webview2_acl(runtime: &Path) {
     // не совпадёт → права переприменятся на новой машине.
     let machine = std::env::var("COMPUTERNAME").unwrap_or_default();
     if machine.is_empty() {
-        return;
+        return Err("Не удалось определить компьютер для настройки WebView2.".into());
     }
     let marker = runtime.join(".reestr-acl");
     if let Ok(saved) = std::fs::read_to_string(&marker) {
         if saved.trim() == machine {
-            return; // уже применено на этой машине
+            return Ok(()); // уже применено на этой машине
         }
     }
 
@@ -100,19 +94,25 @@ fn ensure_webview2_acl(runtime: &Path) {
         .map(|o| o.status.success())
         .unwrap_or(false);
 
-    if ok {
-        let _ = std::fs::write(&marker, &machine);
+    if !ok {
+        return Err(
+            "Не удалось настроить локальные права WebView2. Проверьте разрешения папки профиля."
+                .into(),
+        );
     }
+    std::fs::write(&marker, &machine).map_err(|e| e.to_string())
 }
 
 /// На не-Windows целях (линт/кросс-сборка) — пусто.
 #[cfg(not(target_os = "windows"))]
-fn ensure_webview2_acl(_runtime: &Path) {}
+fn ensure_webview2_acl(_runtime: &Path) -> Result<(), String> {
+    Ok(())
+}
 
-/// Выставляет env WebView2 и создаёт рабочие подпапки. Всё внутри папки программы (принцип 3).
-fn bootstrap_environment(dir: &Path) {
-    // Профиль WebView2 — в папку программы, иначе он «наследит» в %LOCALAPPDATA% (§4).
-    let webview_data = dir.join("data").join("webview");
+/// WebView2 и профиль работают локально; общая папка содержит только опубликованные данные.
+fn bootstrap_environment(dir: &Path, data: &Path) -> Result<(), String> {
+    // Каждый запуск получает отдельный локальный профиль, включая параллельные сеансы.
+    let webview_data = data.join("webview");
     std::env::set_var("WEBVIEW2_USER_DATA_FOLDER", &webview_data);
 
     // Использовать вшитый Fixed Runtime, если он рядом; иначе (dev-машина) —
@@ -121,38 +121,60 @@ fn bootstrap_environment(dir: &Path) {
         std::env::set_var("WEBVIEW2_BROWSER_EXECUTABLE_FOLDER", &runtime);
         // На Win10 (Fixed Version ≥120) без прав App Container рендерер не читает
         // рантайм; выставляем их сами ДО создания webview, один раз на машину.
-        ensure_webview2_acl(&runtime);
+        ensure_webview2_acl(&runtime)?;
+    } else if !cfg!(debug_assertions) {
+        return Err("В комплекте не найден встроенный WebView2. Полностью распакуйте ZIP.".into());
     }
 
-    // Идемпотентно создаём ./data (для БД) и ./imports (куда кладут выгрузки).
-    // ./data/webview создаст сам WebView2; ./logs — лениво при включении логов (§11).
-    let _ = std::fs::create_dir_all(dir.join("data"));
-    let _ = std::fs::create_dir_all(dir.join("imports"));
+    // Локальные временные снимки и профиль создаются до запуска WebView2.
+    std::fs::create_dir_all(data).map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    network::startup::start();
+    match network::launcher::maybe_relaunch() {
+        Ok(true) => return,
+        Ok(false) => {}
+        Err(e) => startup_failure(&e),
+    }
     let exe_dir = resolve_exe_dir();
-    bootstrap_environment(&exe_dir);
-
-    let db_path = exe_dir.join("data").join("registry.db");
-    let connection = db::open_and_migrate(&db_path)
-        .unwrap_or_else(|e| {
-            panic!(
-                "Не удалось открыть базу данных {}. Проверьте, что папка программы доступна для записи. Подробности: {e}",
-                db_path.display()
-            )
-        });
-
-    let app_state = AppState {
-        db: Mutex::new(connection),
-        exe_dir,
-    };
-
-    tauri::Builder::default()
+    let network_root = std::env::var_os("REESTR_SHARED_ROOT").map(PathBuf::from);
+    let data = std::env::var_os("REESTR_CLIENT_DATA")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| exe_dir.join("data"));
+    if let Err(e) = bootstrap_environment(&exe_dir, &data) {
+        startup_failure(&e)
+    }
+    let network = network_root.is_some();
+    let root = network_root
+        .as_ref()
+        .map(|p| p.join("shared"))
+        .unwrap_or_else(|| data.join("shared"));
+    if !network {
+        if let Err(e) = std::fs::create_dir_all(&root) {
+            startup_failure(&e.to_string())
+        }
+    }
+    let seed = network_root
+        .map(|p| p.join("shared/initial/registry.db"))
+        .unwrap_or_else(|| exe_dir.join("data/registry.db"));
+    network::startup::update("Подключение к общей папке и проверка базы…");
+    let app_state = AppState::open(root, data.clone(), seed, network)
+        .unwrap_or_else(|e| startup_failure(&e.to_string()));
+    let smoke = std::env::args().any(|a| a == "--smoke-test");
+    let result = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .manage(app_state)
+        .manage(smoke::Smoke(smoke))
         .invoke_handler(tauri::generate_handler![
+            commands::frontend_ready,
+            smoke::finish_smoke,
+            commands::get_access,
+            commands::setup_admin,
+            commands::login_admin,
+            commands::logout_admin,
             commands::get_registry,
             commands::get_document,
             commands::import_preview,
@@ -176,6 +198,30 @@ pub fn run() {
             commands::get_compare,
             commands::get_print_model,
         ])
-        .run(tauri::generate_context!())
-        .expect("Не удалось запустить программу.");
+        .setup(move |app| {
+            if let Some(window) = app.get_webview_window("main") {
+                window.show()?;
+            }
+            Ok(())
+        })
+        .on_page_load(move |window, payload| {
+            if smoke && payload.event() == tauri::webview::PageLoadEvent::Finished {
+                let _ = window.eval(&smoke::script());
+            }
+        })
+        .run(tauri::generate_context!());
+    network::startup::stop();
+    if let Err(e) = result {
+        startup_failure(&e.to_string())
+    }
+    if network {
+        let _ = std::fs::remove_dir_all(&data);
+    }
+}
+
+pub(crate) fn startup_failure(message: &str) -> ! {
+    network::startup::stop();
+    smoke::startup_error(message);
+    network::startup::show_error(message);
+    std::process::exit(1)
 }

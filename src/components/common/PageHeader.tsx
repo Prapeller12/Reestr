@@ -1,3 +1,5 @@
+import AccessBar from '../access/AccessBar';
+import { useAccess } from '../access/AccessProvider';
 import Icon from './Icon';
 
 import logo1cPath from '../../images/btn__1c-logo.png';
@@ -5,12 +7,14 @@ import logo1cPath from '../../images/btn__1c-logo.png';
 interface Props {
   totalLabel: string;
   onPrint: () => void;
+  onRefresh: () => void;
   onOpenImport: () => void;
 }
 
 // Шапка: заголовок «Реестр писем» слева; справа — источник, счётчик строк
 // и кнопки действий «Импорт выгрузки из 1С» (официальный знак 1С) и «Печать».
-function PageHeader({ totalLabel, onPrint, onOpenImport }: Props) {
+function PageHeader({ totalLabel, onPrint, onOpenImport, onRefresh }: Props) {
+  const {canEdit}=useAccess();
   return (
     <div className="page-header">
       <div className="page-header__left">
@@ -21,10 +25,12 @@ function PageHeader({ totalLabel, onPrint, onOpenImport }: Props) {
         <div className="page-header__divider" />
         <div className="page-header__note">{totalLabel}</div>
         <div className="page-header__divider" />
-        <button type="button" className="btn btn_1c print-hide" onClick={onOpenImport}>
+        <AccessBar />
+        <button type="button" className="btn btn_secondary print-hide" onClick={onRefresh}>Обновить</button>
+        {canEdit ? <button type="button" className="btn btn_1c print-hide" onClick={onOpenImport}>
           <img className="btn__1c-logo" src={logo1cPath} alt="1С" />
           <span>Импорт выгрузки из 1С</span>
-        </button>
+        </button> : null}
         <button type="button" className="btn btn_secondary print-hide" onClick={onPrint}>
           <Icon name="print" size={20} className="btn__ico" />
           <span>Печать</span>

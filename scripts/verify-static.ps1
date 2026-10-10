@@ -202,7 +202,7 @@ if ($softHits.Count -eq 0) {
 # ==========================================================================
 $rsFiles = Get-SourceFiles -Root $TauriSrc -Include @('*.rs')
 $hasCurrentExe = @(Select-Lines -Files $rsFiles -Pattern 'current_exe\(').Count -gt 0
-$currentDirHits = @(Select-Lines -Files $rsFiles -Pattern 'current_dir\(')  # с ( — комментарий «current_dir)» не ловится
+$currentDirHits = @(Select-Lines -Files $rsFiles -Pattern 'std::env::current_dir\(')  # с ( — комментарий «current_dir)» не ловится
 if ($hasCurrentExe -and $currentDirHits.Count -eq 0) {
     Write-Gate PASS 'Пути от бинаря (принцип 4): есть current_exe(, нет current_dir('
 } elseif (-not $hasCurrentExe) {
@@ -311,7 +311,7 @@ if (Test-Path $CommandsTs) {
 }
 if (Test-Path $CommandsRs) {
     $rsRaw = Get-Content -Path $CommandsRs -Raw
-    $backNames = [regex]::Matches($rsRaw, '(?s)#\[tauri::command\].*?fn\s+(\w+)') | ForEach-Object { $_.Groups[1].Value }
+    $backNames = [regex]::Matches($rsRaw, '(?s)#\[tauri::command(?:\(async\))?\].*?fn\s+(\w+)') | ForEach-Object { $_.Groups[1].Value }
     $backNames = @($backNames | Sort-Object -Unique)
 }
 $onlyFront = @($frontNames | Where-Object { $backNames -notcontains $_ })

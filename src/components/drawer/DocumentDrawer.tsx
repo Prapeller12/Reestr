@@ -1,3 +1,4 @@
+import { useAccess } from '../access/AccessProvider';
 import type { DocKind, DocumentView } from '../../api/types';
 import { formatIsoDate } from '../../lib/dates';
 import { docKey, remainingFor } from '../../lib/format';
@@ -21,6 +22,7 @@ interface Props {
 // Карточка письма. У исходящих — статус-полоса + привязка письма (смена статуса) + цепочка + поля.
 // У входящих (status=null) статуса нет: только цепочка (задачи, закрытые этим письмом) и поля.
 function DocumentDrawer({ kind, regNumber, byReg, todayEpoch, onNavigate, onClose, onChanged }: Props) {
+  const {canEdit}=useAccess();
   useScrollLock();
   const doc = byReg.get(docKey(kind, regNumber));
   if (!doc) return null;
@@ -51,7 +53,7 @@ function DocumentDrawer({ kind, regNumber, byReg, todayEpoch, onNavigate, onClos
                 <div className="drawer__due">Срок исполнения: {formatIsoDate(doc.dueDate)}</div>
                 <div className="drawer__remaining">{remaining.text}</div>
               </div>
-              <TransitionBlock doc={doc} onChanged={onChanged} />
+              {canEdit ? <TransitionBlock doc={doc} onChanged={onChanged} /> : null}
             </div>
           ) : null}
 

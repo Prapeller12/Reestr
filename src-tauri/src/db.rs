@@ -14,6 +14,7 @@ pub(crate) const MIGRATIONS: &[(i64, &str)] = &[
     (2, include_str!("../migrations/0002_kind_and_links.sql")),
     (3, include_str!("../migrations/0003_field_overrides.sql")),
     (4, include_str!("../migrations/0004_theme_kind.sql")),
+    (5, include_str!("../migrations/0005_admin.sql")),
 ];
 
 /// Открыть/создать БД, выставить PRAGMA и домигрировать. Идемпотентно.
@@ -155,7 +156,7 @@ mod tests {
         run_migrations(&mut conn).unwrap();
 
         // schema_version = 4 (последняя миграция). Проверки ниже — про перенос данных в 0002.
-        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 4);
+        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 5);
 
         // Документы на месте, kind=outgoing, counterparty перенесён, deadline_src пуст.
         assert_eq!(count(&conn, "SELECT COUNT(*) FROM DOCUMENT"), 2);
@@ -198,7 +199,7 @@ mod tests {
 
         // Идемпотентность: повторная миграция ничего не меняет.
         run_migrations(&mut conn).unwrap();
-        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 4);
+        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 5);
         assert_eq!(count(&conn, "SELECT COUNT(*) FROM DOCUMENT"), 2);
 
         // Целостность FK: нарушений нет.
@@ -254,7 +255,7 @@ mod tests {
 
         // Миграция v2 → latest (аддитивная 0003 + rebuild 0004).
         run_migrations(&mut conn).unwrap();
-        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 4);
+        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 5);
 
         // Существующие факты и оверлей 0002 целы.
         assert_eq!(count(&conn, "SELECT COUNT(*) FROM DOCUMENT"), 1);
@@ -286,7 +287,7 @@ mod tests {
 
         // Идемпотентность: повторная миграция ничего не ломает.
         run_migrations(&mut conn).unwrap();
-        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 4);
+        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 5);
         assert_eq!(count(&conn, "SELECT COUNT(*) FROM FIELD_OVERRIDE"), 1);
 
         // Целостность FK.
@@ -340,7 +341,7 @@ mod tests {
 
         // Миграция v3 → v4 (rebuild THEME_ASSIGNMENT под композитный ключ (kind, doc_reg)).
         run_migrations(&mut conn).unwrap();
-        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 4);
+        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 5);
 
         // Существующее назначение цело и помечено kind='outgoing' (темы были только у исходящих).
         assert_eq!(count(&conn, "SELECT COUNT(*) FROM THEME_ASSIGNMENT"), 1);
@@ -364,7 +365,7 @@ mod tests {
 
         // Идемпотентность: повторная миграция ничего не меняет.
         run_migrations(&mut conn).unwrap();
-        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 4);
+        assert_eq!(count(&conn, "SELECT version FROM schema_version LIMIT 1"), 5);
         assert_eq!(count(&conn, "SELECT COUNT(*) FROM THEME_ASSIGNMENT"), 2);
 
         // Целостность FK: нарушений нет.

@@ -1,3 +1,4 @@
+import { useAccess } from './components/access/AccessProvider';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getRegistry, listThemes } from './api/commands';
 import type { DocKind, DocumentView, RegistryResult, ThemeDto } from './api/types';
@@ -29,6 +30,7 @@ interface DocRef {
 }
 
 function App() {
+  const {canEdit, access, refresh: refreshAccess} = useAccess();
   const registry = useCommand<RegistryResult>(() => getRegistry(), []);
   const themes = useCommand<ThemeDto[]>(() => listThemes(), []);
 
@@ -53,6 +55,13 @@ function App() {
     reloadRegistry();
     reloadThemes();
   }, [reloadRegistry, reloadThemes]);
+
+  useEffect(() => {
+    const timer = window.setInterval(reloadAll, 15000);
+    return () => window.clearInterval(timer);
+  }, [reloadAll]);
+  useEffect(() => { if (!canEdit) { setImportOpen(false); setThemesReq(null); } }, [canEdit]);
+  useEffect(() => { reloadAll(); }, [access?.revision, reloadAll]);
 
   const result = registry.state.status === 'ok' ? registry.state.data : null;
   const themeList = themes.state.status === 'ok' ? themes.state.data : [];
@@ -229,6 +238,7 @@ function App() {
       <PageHeader
         totalLabel={`${lettersLabel(allDocs.length)} · ${themesLabel(themeCount)}`}
         onPrint={() => window.print()}
+        onRefresh={() => {reloadAll(); refreshAccess();}}
         onOpenImport={() => setImportOpen(true)}
       />
       <RefreshAlert
@@ -267,7 +277,7 @@ function App() {
         />
       )}
 
-      {themesReq ? (
+      {canEdit && themesReq ? (
         <ThemesModal
           docs={allDocs}
           themes={themeList}
@@ -279,12 +289,12 @@ function App() {
         />
       ) : null}
 
-      {importOpen ? (
+      {canEdit && importOpen ? (
         <ImportModal byReg={byReg} onClose={() => setImportOpen(false)} onApplied={reloadAll} />
       ) : null}
 
       {detail ? (
-        <DocumentDrawer
+        <DocumentDrawer key={`${detail.kind}:${detail.regNumber}:${canEdit}`}
           kind={detail.kind}
           regNumber={detail.regNumber}
           byReg={byReg}

@@ -7,7 +7,7 @@ if ($env:OS -ne 'Windows_NT') { throw 'This build requires Windows.' }
 $root = Split-Path -Parent $PSScriptRoot
 $target = 'x86_64-pc-windows-msvc'
 $releaseRoot = Join-Path $root ('release-' + [guid]::NewGuid().ToString('N'))
-$portable = Join-Path $releaseRoot 'Reestr-Windows-x64'
+$portable = Join-Path $releaseRoot 'Reestr-Network-Windows-x64'
 New-Item -ItemType Directory -Path $releaseRoot | Out-Null
 function Check-Exit([string]$Step) {
     if ($LASTEXITCODE -ne 0) { throw "$Step failed: exit $LASTEXITCODE" }
@@ -22,7 +22,7 @@ try {
     Check-Exit 'Frontend build'
     Push-Location (Join-Path $root 'src-tauri')
     try {
-        & cargo test --locked --target $target
+        & cargo test --locked --release --target $target
         Check-Exit 'Rust tests'
     } finally { Pop-Location }
     & powershell.exe -NoProfile -File (Join-Path $PSScriptRoot 'verify-static.ps1') -RepoRoot $root
@@ -64,7 +64,25 @@ try {
     $exe = Join-Path $root "src-tauri/target/$target/release/reestr.exe"
     & powershell.exe -NoProfile -File (Join-Path $PSScriptRoot 'package-release.ps1') -RepoRoot $root -OutDir $portable -SkipBuild -ExePath $exe -WebView2Path $runtime.FullName -NoSampleImport
     Check-Exit 'Portable packaging'
+    foreach ($folder in @('config','shared/initial','shared/snapshots')) {
+        New-Item -ItemType Directory -Path (Join-Path $portable $folder) -Force | Out-Null
+    }
+    $version = (& git rev-parse HEAD).Trim()
+    $networkConfig = [ordered]@{
+        enabled = $true
+        version = $version
+        exeSha256 = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash
+        runtimeSha256 = (Get-FileHash -LiteralPath $runtimeExe -Algorithm SHA256).Hash
+        runtimeFolder = $runtime.Name
+    }
+    [IO.File]::WriteAllText((Join-Path $portable 'config/network.json'), ($networkConfig | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
+    Copy-Item (Join-Path $PSScriptRoot 'release-assets/README-NETWORK.txt') (Join-Path $portable 'README.txt') -Force
+    # Keep empty shared folders in ZIP even with archivers that discard directories.
+    foreach ($folder in @('shared/initial','shared/snapshots')) {
+        'Managed by Reestr. See README.txt.' | Set-Content (Join-Path $portable "$folder/README.txt") -Encoding utf8
+    }
     $metadata = [ordered]@{
+        sourceCommit = $version
         target = $target
         runtime = $runtime.Name
         runtimeSource = $RuntimeCabUrl
@@ -75,8 +93,8 @@ try {
         validation = 'Compilation and automated tests only. Windows 10/11 functional acceptance remains required.'
     }
     $metadata | ConvertTo-Json | Set-Content -Encoding UTF8 (Join-Path $portable 'BUILD-INFO.json')
-    $zip = Join-Path $releaseRoot 'Reestr-Windows-x64.zip'
+    $zip = Join-Path $releaseRoot 'Reestr-Network-Windows-x64.zip'
     Compress-Archive -LiteralPath $portable -DestinationPath $zip -CompressionLevel Optimal
-    ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash + '  Reestr-Windows-x64.zip') | Set-Content -Encoding ASCII "$zip.sha256"
+    ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash + '  Reestr-Network-Windows-x64.zip') | Set-Content -Encoding ASCII "$zip.sha256"
     Write-Host "Portable package: $zip"
 } finally { Pop-Location }

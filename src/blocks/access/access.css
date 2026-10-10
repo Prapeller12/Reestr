@@ -1,0 +1,9 @@
+.access {display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.access__status,.access__hint {font-size:var(--fs-caption); color:var(--color-text-secondary);}
+.access__overlay {align-items:center; z-index:60; padding:24px;}
+.access__dialog {width:440px; max-width:95vw; padding:28px; border-radius:16px; background:var(--c-surface); box-shadow:var(--shadow-xl); display:flex; flex-direction:column; gap:16px;}
+.access__dialog h2,.access__dialog p {margin:0;}
+.access__dialog label {display:flex; flex-direction:column; gap:6px;}
+.access__dialog input {padding:10px 12px; border:1px solid var(--b-muted); border-radius:8px; font:inherit;}
+.access__actions {display:flex; gap:10px; justify-content:flex-end;}
+.access__error {color:var(--c-danger); font-size:var(--fs-secondary);}

@@ -234,7 +234,7 @@ function TimelineView({ groups, todayEpoch, zoom, onZoom, hideClosed, onToggleHi
             ))}
           </div>
         ) : (
-          <div className="timeline__empty">Данных нет. Импортируйте выгрузку из 1С.</div>
+          <div className="timeline__empty">Данных нет. Импорт писем выполняет администратор.</div>
         )}
       </div>
     </div>

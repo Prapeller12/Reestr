@@ -529,3 +529,33 @@ describe('экранная горизонтальная строка темы', 
     }
   });
 });
+
+describe('раскрытие независимых цепочек', () => {
+  const groupsFor = (docs: DocumentView[]) => {
+    const groups = [lane('Тема', docs)];
+    return layoutTimelineRows(build(groups, 'quarter'), collectChains(groups))[0]!.groups;
+  };
+  it('три пересекающиеся цепочки раскрываются в три строки, а не в одну', () => {
+    const docs = ['A','B','C'].flatMap(p => [
+      out(`${p}1`, '2026-09-01', [['outgoing',`${p}2`]], 'reworked'),
+      out(`${p}2`, '2026-09-02', [['incoming',`${p}3`]], 'done'),
+      inc(`${p}3`, '2026-09-03'),
+    ]);
+    const groups = groupsFor(docs);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]!.chains.map(c => c.members.map(m => m.regNumber))).toEqual([
+      ['A1','A2','A3'],['B1','B2','B3'],['C1','C2','C3'],
+    ]);
+  });
+  it('совпадение даты и номера у разных видов не создаёт связь', () => {
+    expect(groupsFor([out('1','2026-09-01'),inc('1','2026-09-01'),out('2','2026-09-01')])[0]!.chains).toHaveLength(3);
+  });
+  it('развилки и общий ответ остаются одной связанной цепочкой', () => {
+    const groups = groupsFor([out('1','2026-09-01',[['outgoing','2'],['incoming','3']]),out('2','2026-09-02',[['incoming','3']]),inc('3','2026-09-03'),out('4','2026-09-02')]);
+    expect(groups[0]!.chains.map(c=>c.members.map(m=>m.regNumber))).toEqual([['1','2','3'],['4']]);
+  });
+  it('цикл не зацикливает раскрытие и не дублирует письма', () => {
+    const groups = groupsFor([out('1','2026-09-01',[['outgoing','2']]),out('2','2026-09-02',[['outgoing','1']]),out('3','2026-09-01')]);
+    expect(groups[0]!.chains.map(c=>c.members.map(m=>m.regNumber))).toEqual([['1','2'],['3']]);
+  });
+});

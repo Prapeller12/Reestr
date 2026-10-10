@@ -163,3 +163,10 @@ export interface BulkAssignResult {
 export interface DeleteThemeResult {
   reassigned: number;
 }
+
+export interface AccessStatus {
+  role: 'viewer' | 'admin';
+  initialized: boolean;
+  network: boolean;
+  revision: string | null;
+}

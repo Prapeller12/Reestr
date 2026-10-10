@@ -452,12 +452,11 @@
 .timeline__unfold {
   position: absolute;
   top: 0;
-  display: flex;
-  gap: 12px;
+  display: block;
   padding: 0 8px;
   box-sizing: border-box;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
   background: var(--c-surface);
   border-radius: var(--radius-8);
   box-shadow: var(--shadow-s);
@@ -487,3 +486,7 @@
   .timeline__lane_screen { display: none !important; }
   .timeline__lane_print { display: grid; }
 }
+
+.timeline__unfold-chain {width:max-content; min-width:100%; padding:4px 0; border-bottom:1px solid var(--b-row);}
+.timeline__unfold-heading {position:sticky; left:0; width:180px; font-size:var(--fs-caption); color:var(--color-text-secondary); line-height:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.timeline__unfold-row {display:flex; gap:12px;}
