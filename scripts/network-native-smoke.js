@@ -44,6 +44,7 @@
     ]) await denied(name,args);
     checks.push('viewer: all 13 import/mutation IPC commands denied; import UI hidden');
     if (!access.initialized) {
+      assert(config.phase === 'unc-first-run', 'Only the isolated first-run test may initialize a registry');
       await signInUI(true);
       for (const kind of ['outgoing','incoming']) {
         await invoke('import_preview',{path:config[kind],kind});
@@ -70,6 +71,7 @@
     assert(registry.groups.flatMap(g=>g.documents).length===9,'Expected 9 persisted synthetic letters');
     button('Обновить').click();
     (await wait(()=>button('Хронология'),'No timeline tab')).click();
+    await wait(()=>button('Кварталы'),'Timeline controls did not appear');
     const hide=button('Скрыть завершённые');if(hide?.classList.contains('pill_active')) hide.click();
     button('Кварталы').click();
     const deck=await wait(()=>document.querySelector('.timeline__lane_screen .timeline__deck'),'No overlapping deck');
@@ -98,6 +100,6 @@
     checks.push('expanded letter clickable; logout revokes backend and UI editing');
     await invoke('finish_smoke',{report:{ok:true,phase:config.phase,checks,geometry}});
   } catch(e) {
-    await invoke('finish_smoke',{report:{ok:false,phase:config.phase,checks,error:String(e),errors}});
+    await invoke('finish_smoke',{report:{ok:false,phase:config.phase,checks,error:String(e),stack:e?.stack,buttons:[...document.querySelectorAll('button')].map(b=>b.textContent.trim()),errors}});
   }
 })();

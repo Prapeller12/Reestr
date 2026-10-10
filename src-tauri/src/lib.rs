@@ -164,6 +164,18 @@ pub fn run() {
     let app_state = AppState::open(root, data.clone(), seed, network)
         .unwrap_or_else(|e| startup_failure(&e.to_string()));
     let smoke = std::env::args().any(|a| a == "--smoke-test");
+    if smoke
+        && [
+            "REESTR_SMOKE_REPORT",
+            "REESTR_SMOKE_PHASE",
+            "REESTR_SMOKE_OUT",
+            "REESTR_SMOKE_IN",
+        ]
+        .iter()
+        .any(|name| std::env::var(name).map(|v| v.is_empty()).unwrap_or(true))
+    {
+        startup_failure("Самопроверка разрешена только в подготовленной тестовой среде. Запустите EXE без --smoke-test.");
+    }
     let result = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .manage(app_state)

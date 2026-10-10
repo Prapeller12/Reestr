@@ -91,7 +91,17 @@ impl Store {
             })
             .unwrap_or_else(|| self.seed.clone());
         let mut memory = Connection::open_in_memory()?;
-        if source.is_file() {
+        let exists = match source.metadata() {
+            Ok(metadata) if metadata.is_file() => true,
+            Ok(_) => {
+                return Err(ApiError::io(
+                    "Ожидался файл базы данных, но найден каталог.",
+                ))
+            }
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => false,
+            Err(e) => return Err(e.into()),
+        };
+        if exists {
             if head.is_none()
                 && source
                     .with_file_name(format!(

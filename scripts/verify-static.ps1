@@ -202,7 +202,7 @@ if ($softHits.Count -eq 0) {
 # ==========================================================================
 $rsFiles = Get-SourceFiles -Root $TauriSrc -Include @('*.rs')
 $hasCurrentExe = @(Select-Lines -Files $rsFiles -Pattern 'current_exe\(').Count -gt 0
-$currentDirHits = @(Select-Lines -Files $rsFiles -Pattern 'std::env::current_dir\(')  # с ( — комментарий «current_dir)» не ловится
+$currentDirHits = @(Select-Lines -Files $rsFiles -Pattern '(?<!\.)\bcurrent_dir\(')  # с ( — комментарий «current_dir)» не ловится
 if ($hasCurrentExe -and $currentDirHits.Count -eq 0) {
     Write-Gate PASS 'Пути от бинаря (принцип 4): есть current_exe(, нет current_dir('
 } elseif (-not $hasCurrentExe) {
@@ -318,8 +318,8 @@ $onlyFront = @($frontNames | Where-Object { $backNames -notcontains $_ })
 $onlyBack  = @($backNames  | Where-Object { $frontNames -notcontains $_ })
 if ($frontNames.Count -gt 0 -and $onlyFront.Count -eq 0 -and $onlyBack.Count -eq 0) {
     Write-Gate PASS ('Контракт-шов: множества команд совпадают ({0} шт.)' -f $frontNames.Count)
-    if ($frontNames.Count -ne 22) {
-        Write-Gate WARN ('Контракт-шов: количество команд = {0}, ожидалось 22 (qa3-f4-backend.md)' -f $frontNames.Count)
+    if ($frontNames.Count -ne 27) {
+        Write-Gate WARN ('Контракт-шов: количество команд = {0}, ожидалось 27 (22 исходных + 4 команды доступа + готовность интерфейса)' -f $frontNames.Count)
     }
 } else {
     $detail = @()

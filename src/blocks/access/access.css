@@ -7,3 +7,7 @@
 .access__dialog input {padding:10px 12px; border:1px solid var(--b-muted); border-radius:8px; font:inherit;}
 .access__actions {display:flex; gap:10px; justify-content:flex-end;}
 .access__error {color:var(--c-danger); font-size:var(--fs-secondary);}
+
+/* Дополнительные действия должны помещаться и при минимальной ширине окна. */
+.page-header {flex-wrap:wrap;}
+.page-header__meta {flex-wrap:wrap; justify-content:flex-end;}

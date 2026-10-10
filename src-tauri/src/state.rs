@@ -379,4 +379,37 @@ mod tests {
         drop((a, b));
         fs::remove_dir_all(p).unwrap();
     }
+    #[test]
+    fn publication_failure_keeps_last_committed_revision_and_data() {
+        let p = root();
+        let app = client(&p, "a");
+        app.setup_admin(PASSWORD).unwrap();
+        let before = app.access().unwrap().revision;
+        fs::rename(p.join("shared/snapshots"), p.join("saved-snapshots")).unwrap();
+        fs::write(p.join("shared/snapshots"), b"unavailable directory").unwrap();
+        let result = app.write(|c| {
+            c.execute(
+                "INSERT INTO THEME(name,user_created) VALUES('not-published',1)",
+                [],
+            )?;
+            Ok(())
+        });
+        assert!(result.is_err());
+        fs::remove_file(p.join("shared/snapshots")).unwrap();
+        fs::rename(p.join("saved-snapshots"), p.join("shared/snapshots")).unwrap();
+        assert_eq!(app.access().unwrap().revision, before);
+        let reader = client(&p, "reader");
+        for state in [&app, &reader] {
+            assert_eq!(
+                state
+                    .read(|c| Ok(
+                        c.query_row("SELECT COUNT(*) FROM THEME", [], |r| r.get::<_, i64>(0))?
+                    ))
+                    .unwrap(),
+                0
+            );
+        }
+        drop((app, reader));
+        fs::remove_dir_all(p).unwrap();
+    }
 }
